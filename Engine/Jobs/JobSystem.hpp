@@ -1,57 +1,15 @@
 #pragma once
 
+#include "Jobs/JobHandle.hpp"
+#include "Jobs/JobThread.hpp"
+
 #include <cstdint>
 #include <functional>
 #include <memory>
 
 namespace neo {
 
-	namespace detail {
-		// Set once per thread when the scheduler starts it
-		extern thread_local bool gIsRenderThread;
-	}
-
-	[[nodiscard]] inline bool isRenderThread() {
-		return detail::gIsRenderThread;
-	}
-
-	// Pinned threads
-	enum class PinnedThread : uint8_t {
-		Main = 0,
-		Render,
-		COUNT
-	};
-
-	// Matches ENKITS_TASK_PRIORITIES_NUM
-	enum class JobPriority : uint8_t {
-		High,
-		Normal,
-		Low
-	};
-
-	using JobFn = std::function<void()>;
 	using JobRangeFn = std::function<void(uint32_t begin, uint32_t end, uint32_t threadIndex)>;
-
-	class JobHandle {
-	public:
-		JobHandle();
-		~JobHandle(); // Blocks for job to complete
-		JobHandle(JobHandle&&) noexcept;
-		JobHandle& operator=(JobHandle&&) noexcept;
-		JobHandle(const JobHandle&) = delete;
-		JobHandle& operator=(const JobHandle&) = delete;
-
-		void wait();
-		bool isComplete() const;
-		bool isValid() const { return mTask != nullptr; }
-
-	private:
-		friend class JobSystem;
-
-		struct Task;
-		explicit JobHandle(std::unique_ptr<Task> task);
-		std::unique_ptr<Task> mTask;
-	};
 
 	// enkiTS wrapper
 	class JobSystem {

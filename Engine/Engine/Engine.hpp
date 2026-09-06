@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Renderer/Renderer.hpp"
-#include "Jobs/JobSystem.hpp"
+#include "Jobs/JobHandle.hpp"
 #include "Util/Util.hpp"
 
 #include "ECS/ECS.hpp"

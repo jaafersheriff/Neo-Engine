@@ -1,7 +1,7 @@
 #pragma once
 
 #include <ext/entt_incl.hpp>
-#include "Jobs/JobSystem.hpp"
+#include "Jobs/JobThread.hpp"
 #include "Util/Assert.hpp"
 
 #include <entt/container/dense_map.hpp>
