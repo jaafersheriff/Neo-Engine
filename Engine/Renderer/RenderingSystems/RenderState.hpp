@@ -41,6 +41,12 @@ namespace neo {
 	};
 
 
+	enum class PolygonMode {
+		Fill,
+		Line,
+		Point
+	};
+
 	struct RenderState {
 		// Default render state
 		std::optional<DepthState> mDepthState = DepthState{
@@ -49,6 +55,7 @@ namespace neo {
 		};
 		std::optional<CullFace> mCullFace = CullFace::Back;
 		std::optional<BlendState> mBlendState = std::nullopt;
+		PolygonMode mPolygonMode = PolygonMode::Fill;
 		bool mWireframeable = true;
 	};
 
@@ -56,6 +63,7 @@ namespace neo {
 		std::nullopt,
 		CullFace::Back,
 		std::nullopt,
+		PolygonMode::Fill,
 		true
 	};
 
@@ -63,6 +71,7 @@ namespace neo {
 		std::nullopt,
 		CullFace::Back,
 		std::nullopt,
+		PolygonMode::Fill,
 		false
 	};
 
