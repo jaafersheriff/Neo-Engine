@@ -125,6 +125,15 @@ namespace neo {
 		return vbo->second;
 	}
 
+	bool Mesh::hasIBO() const {
+		return mElementVBO.has_value();
+	}
+
+	const VertexBuffer& Mesh::getIBO() const {
+		NEO_ASSERT(mElementVBO.has_value(), "Attempting to retrieve an ElementBuffer that doesn't exist");
+		return mElementVBO.value();
+	}
+
 	void Mesh::addElementBuffer(uint32_t count, types::ByteFormats format, uint32_t byteSize, const uint8_t* data) {
 		NEO_ASSERT(!mElementVBO.has_value(), "Attempting to add 2 ElementBuffers");
 

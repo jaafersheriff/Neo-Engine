@@ -35,6 +35,7 @@ namespace neo {
 			std::variant<
 			bool,
 			int,
+			uint16_t,
 			uint32_t,
 			double,
 			float,
@@ -42,6 +43,8 @@ namespace neo {
 			glm::ivec2,
 			glm::uvec2,
 			glm::vec3,
+			glm::ivec3,
+			glm::uvec3,
 			glm::vec4,
 			glm::mat3,
 			glm::mat4
@@ -51,6 +54,8 @@ namespace neo {
 		[[nodiscard]] ShaderBarrier bindImageTexture(const char* name, const Texture& texture, types::shader::Access accessType, int mip = 0) const;
 		[[nodiscard]] ShaderBarrier bindShaderBuffer(const char* name, const ShaderBuffer& buffer, types::shader::Access accessType) const;
 		[[nodiscard]] ShaderBarrier bindShaderBuffer(const char* name, const Mesh& mesh, types::mesh::VertexType vertexType, types::shader::Access accessType) const;
+		// TODO - just make Index into a VertexType and then hide the internal Mesh details
+		[[nodiscard]] ShaderBarrier bindMeshIndices(const char* name, const Mesh& mesh, types::shader::Access accessType) const;
 
 		void dispatch(glm::uvec3 workGroups) const;
 

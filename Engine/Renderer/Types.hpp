@@ -144,21 +144,7 @@ namespace neo {
 			enum class Filters : uint8_t {
 				Linear,
 				Nearest,
-			};
-
-			enum class Wraps : uint8_t {
-				Repeat,
-				Clamp,
-				Mirrored
-			};
-
-
-			enum class BaseFormats : uint8_t {
-				R,
-				RG,
-				RGB,
-				RGBA,
-				R_INTEGER,
+			};R_INTEGER,
 				RG_INTEGER,
 				RGB_INTEGER,
 				RGBA_INTEGER,
