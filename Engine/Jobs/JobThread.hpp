@@ -22,7 +22,7 @@ namespace neo {
 
 	// The threads work can be pinned to. Pinned is the enkiTS term for aiming work at a
 	// specific thread - it is not CPU affinity.
-	enum class JobThread : uint8_t {
+	enum class PinnedThread : uint8_t {
 		Main = 0,
 		Render,
 		COUNT

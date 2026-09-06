@@ -27,13 +27,12 @@ extern "C" {
 
 #include "ImGuiManager.hpp"
 
-#include "Messaging/Messenger.hpp"
-
-#include "Jobs/JobSystem.hpp"
-
 #include "Loader/Loader.hpp"
 #include "Loader/STBIImageData.hpp"
 #include "Loader/MeshGenerator.hpp"
+
+#include "Messaging/Messenger.hpp"
+
 #include "ResourceManager/ResourceManagers.hpp"
 
 #include "Util/Profiler.hpp"
@@ -73,7 +72,7 @@ namespace neo {
 
 		}
 
-		ServiceLocator<JobSystem>::ref().runSyncOn(JobThread::Render, [this] {
+		ServiceLocator<JobSystem>::ref().runSyncOn(PinnedThread::Render, [this] {
 			// On a background thread because GL things
 			ServiceLocator<Renderer>::ref().initGPUContext(mWindow);
 			ServiceLocator<Renderer>::ref().init();
@@ -182,7 +181,7 @@ namespace neo {
 					{
 						TRACY_ZONEN("Start next frame");
 						IDemo& demo = *demos.getCurrentDemo();
-						mRenderJob = ServiceLocator<JobSystem>::ref().dispatchOn(JobThread::Render,
+						mRenderJob = ServiceLocator<JobSystem>::ref().dispatchOn(PinnedThread::Render,
 							[this, &renderECS, &demo, &profiler, &resourceManagers] {
 								resourceManagers._tick();
 
@@ -206,7 +205,7 @@ namespace neo {
 		ServiceLocator<JobSystem>::ref().waitForDetached();
 
 		demos.getCurrentDemo()->destroy();
-		ServiceLocator<JobSystem>::ref().runSyncOn(JobThread::Render, [&resourceManagers] {
+		ServiceLocator<JobSystem>::ref().runSyncOn(PinnedThread::Render, [&resourceManagers] {
 			resourceManagers._clear();
 			ServiceLocator<Renderer>::ref().clean();
 		});
@@ -221,7 +220,7 @@ namespace neo {
 
 		/* Destroy the old state */
 		demos.getCurrentDemo()->destroy();
-		ServiceLocator<JobSystem>::ref().runSyncOn(JobThread::Render, [&resourceManagers] {
+		ServiceLocator<JobSystem>::ref().runSyncOn(PinnedThread::Render, [&resourceManagers] {
 			resourceManagers._clear();
 			ServiceLocator<Renderer>::ref().clean();
 		});
@@ -243,7 +242,7 @@ namespace neo {
 		_createPrefabs(resourceManagers);
 		ServiceLocator<ImGuiManager>::ref().reload(resourceManagers);
 
-		ServiceLocator<JobSystem>::ref().runSyncOn(JobThread::Render, [&resourceManagers] {
+		ServiceLocator<JobSystem>::ref().runSyncOn(PinnedThread::Render, [&resourceManagers] {
 			resourceManagers._init();
 			ServiceLocator<Renderer>::ref().init();
 			resourceManagers._tick();
