@@ -31,6 +31,7 @@ namespace neo {
 			void removeVertexBuffer(types::mesh::VertexType type);
 
 			void addElementBuffer(uint32_t count, types::ByteFormats format, uint32_t byteSize, const uint8_t* data = nullptr);
+			void updateElementBuffer(uint32_t count, uint32_t byteSize, const uint8_t* data);
 			void removeElementBuffer();
 
 			bool hasVBO(types::mesh::VertexType type) const;

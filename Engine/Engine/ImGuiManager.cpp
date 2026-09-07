@@ -337,14 +337,11 @@ namespace neo {
 							static_cast<uint32_t>(vertices.size() * sizeof(ImDrawVert)),
 							reinterpret_cast<const uint8_t*>(vertices.data())
 						);
-						mesh.removeElementBuffer();
-						mesh.addElementBuffer(
+						mesh.updateElementBuffer(
 							static_cast<uint32_t>(elements.size()),
-							sizeof(ImDrawIdx) == 2 ? types::ByteFormats::UnsignedShort : types::ByteFormats::UnsignedInt,
 							static_cast<uint32_t>(elements.size() * sizeof(ImDrawIdx)),
 							reinterpret_cast<const uint8_t*>(elements.data())
 						);
-						mesh.mPrimitiveType = types::mesh::Primitive::Triangles;
 					});
 			}
 
