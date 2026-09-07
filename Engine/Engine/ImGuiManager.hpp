@@ -11,7 +11,7 @@
 #include <array>
 
 struct GLFWwindow;
-#define MAX_IMGUI_MESHES 32
+#define IMGUI_FRAME_BUFFER_COUNT 3 // 2 should be enough, but 3 for magical reasons
 
 namespace neo {
 	class WindowSurface;
@@ -64,7 +64,7 @@ namespace neo {
 		Viewport mViewport;
 		ImGuiConsole mConsole;
 		
-		std::array<MeshHandle, MAX_IMGUI_MESHES> mImGuiMeshes;
-		uint16_t mImGuiMeshesOffset = 0;
+		std::array<MeshHandle, IMGUI_FRAME_BUFFER_COUNT> mImGuiMeshes;
+		uint8_t mImGuiMeshesOffset = 0;
 	};
 }
