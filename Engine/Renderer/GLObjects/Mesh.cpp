@@ -152,6 +152,18 @@ namespace neo {
 		}
 	}
 
+	void Mesh::updateElementBuffer(uint32_t count, uint32_t byteSize, const uint8_t* data) {
+		NEO_ASSERT(mElementVBO.has_value(), "Attempting to update an ElementBuffer that doesn't exist");
+		mElementVBO->elementCount = count;
+
+		glBindVertexArray(mVAOID);
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, mElementVBO->vboID);
+		if (byteSize) {
+			TRACY_GPUN("glBufferData");
+			glBufferData(GL_ELEMENT_ARRAY_BUFFER, byteSize, data, GL_DYNAMIC_DRAW);
+		}
+	}
+
 	void Mesh::removeElementBuffer() {
 		if (mElementVBO.has_value()) {
 			glBindVertexArray(mVAOID);
