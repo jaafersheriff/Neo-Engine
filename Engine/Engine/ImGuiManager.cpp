@@ -105,6 +105,7 @@ namespace neo {
 		
 		ImGui_ImplGlfw_InitForOpenGL(window.getWindow(), false);
 		ImGui::GetIO().BackendFlags |= ImGuiBackendFlags_RendererHasViewports;
+		ImGui::GetIO().BackendFlags |= ImGuiBackendFlags_RendererHasVtxOffset;
 		ImGui::GetPlatformIO().Renderer_RenderWindow = _renderWindow;
 	}
 
@@ -240,7 +241,7 @@ namespace neo {
 			}).mHandle
 		);
 
-		for (int i = 0; i < MAX_IMGUI_MESHES; i++) {
+		for (int i = 0; i < IMGUI_FRAME_BUFFER_COUNT; i++) {
 			MeshLoadDetails loadDetails;
 			loadDetails.mPrimtive = types::mesh::Primitive::Triangles;
 			loadDetails.mVertexBuffers[types::mesh::VertexType::Position] = MeshLoadDetails::VertexBuffer{
@@ -292,58 +293,29 @@ namespace neo {
 
 		ImDrawData* drawData = ImGui::GetDrawData();
 		NEO_ASSERT(drawData && drawData->Valid, "ImDrawData is invalid");
-		if (drawData->CmdListsCount == 0) {
+		if (drawData->CmdListsCount == 0 || drawData->TotalVtxCount == 0 || drawData->TotalIdxCount == 0) {
 			return;
 		}
 
 		const ImVec2 clipOffset = drawData->DisplayPos;         // (0,0) unless using multi-viewports
-		const ImVec2 clipScale = drawData->FramebufferScale; // (1,1) unless using retina display which are often (2,2)0
+		const ImVec2 clipScale = drawData->FramebufferScale; // (1,1) unless using retina display which are often (2,2)
+
+		const uint8_t frameIndex = mImGuiMeshesOffset;
+		mImGuiMeshesOffset = (mImGuiMeshesOffset + 1) % IMGUI_FRAME_BUFFER_COUNT;
+		const MeshHandle currentMesh = mImGuiMeshes[frameIndex];
+
+		std::vector<ImDrawVert> vertices;
+		vertices.resize(static_cast<size_t>(drawData->TotalVtxCount));
+		std::vector<ImDrawIdx> elements;
+		elements.resize(static_cast<size_t>(drawData->TotalIdxCount));
 
 		uint32_t drawIndex = 0;
+		uint32_t vertexOffset = 0;
+		uint32_t elementOffset = 0;
 		for (int i = 0; i < drawData->CmdListsCount; i++) {
-			NEO_ASSERT(i < MAX_IMGUI_MESHES, "ImGui is requesting too many meshes :(");
-			const MeshHandle currentMesh = mImGuiMeshes[mImGuiMeshesOffset];
-			mImGuiMeshesOffset = (mImGuiMeshesOffset + 1) % MAX_IMGUI_MESHES;
-
 			const ImDrawList* cmdList = drawData->CmdLists[i];
-			{
-				std::vector<ImDrawVert> vertices;
-				vertices.resize(cmdList->VtxBuffer.Size);
-				memcpy(vertices.data(), cmdList->VtxBuffer.Data, cmdList->VtxBuffer.Size * sizeof(ImDrawVert));
-				std::vector<ImDrawIdx> elements;
-				elements.resize(cmdList->IdxBuffer.Size);
-				memcpy(elements.data(), cmdList->IdxBuffer.Data, cmdList->IdxBuffer.Size * sizeof(ImDrawIdx));
-
-				resourceManagers.mMeshManager.transact(currentMesh,
-					[vertices = std::move(vertices),
-					elements = std::move(elements)]
-					(Mesh& mesh) {
-						// Duping the vertex buffer 3x because they need to be indexed separately :(
-						mesh.updateVertexBuffer(
-							types::mesh::VertexType::Position,
-							static_cast<uint32_t>(vertices.size()),
-							static_cast<uint32_t>(vertices.size() * sizeof(ImDrawVert)),
-							reinterpret_cast<const uint8_t*>(vertices.data())
-						);
-						mesh.updateVertexBuffer(
-							types::mesh::VertexType::Texture0,
-							static_cast<uint32_t>(vertices.size()),
-							static_cast<uint32_t>(vertices.size() * sizeof(ImDrawVert)),
-							reinterpret_cast<const uint8_t*>(vertices.data())
-						);
-						mesh.updateVertexBuffer(
-							types::mesh::VertexType::Normal,
-							static_cast<uint32_t>(vertices.size()),
-							static_cast<uint32_t>(vertices.size() * sizeof(ImDrawVert)),
-							reinterpret_cast<const uint8_t*>(vertices.data())
-						);
-						mesh.updateElementBuffer(
-							static_cast<uint32_t>(elements.size()),
-							static_cast<uint32_t>(elements.size() * sizeof(ImDrawIdx)),
-							reinterpret_cast<const uint8_t*>(elements.data())
-						);
-					});
-			}
+			memcpy(vertices.data() + vertexOffset, cmdList->VtxBuffer.Data, cmdList->VtxBuffer.Size * sizeof(ImDrawVert));
+			memcpy(elements.data() + elementOffset, cmdList->IdxBuffer.Data, cmdList->IdxBuffer.Size * sizeof(ImDrawIdx));
 
 			for (int cmd_i = 0; cmd_i < cmdList->CmdBuffer.Size; cmd_i++) {
 				const ImDrawCmd* cmd = &cmdList->CmdBuffer[cmd_i];
@@ -372,8 +344,9 @@ namespace neo {
 						clipMax.x - clipMin.x,
 						clipMax.y - clipMin.y
 					);
-					draw.mElementCount = static_cast<uint16_t>(cmd->ElemCount);
-					draw.mElementBufferOffset = static_cast<uint16_t>(cmd->IdxOffset * sizeof(ImDrawIdx));
+					draw.mElementCount = cmd->ElemCount;
+					draw.mElementBufferOffset = static_cast<uint32_t>((elementOffset + cmd->IdxOffset) * sizeof(ImDrawIdx));
+					draw.mVertexOffset = vertexOffset + cmd->VtxOffset;
 					draw.mDrawOrder = drawIndex++;
 
 					ecs.submitEntity(std::move(ECS::EntityBuilder{}
@@ -382,7 +355,28 @@ namespace neo {
 					));
 				}
 			}
+
+			vertexOffset += static_cast<uint32_t>(cmdList->VtxBuffer.Size);
+			elementOffset += static_cast<uint32_t>(cmdList->IdxBuffer.Size);
 		}
+
+		resourceManagers.mMeshManager.transact(currentMesh,
+			[vertices = std::move(vertices),
+			elements = std::move(elements)]
+			(Mesh& mesh) {
+				// Duping the vertex buffer 3x because they need to be indexed separately :(
+				const uint32_t vertexCount = static_cast<uint32_t>(vertices.size());
+				const uint32_t vertexBytes = static_cast<uint32_t>(vertices.size() * sizeof(ImDrawVert));
+				const uint8_t* vertexData = reinterpret_cast<const uint8_t*>(vertices.data());
+				mesh.updateVertexBuffer(types::mesh::VertexType::Position, vertexCount, vertexBytes, vertexData);
+				mesh.updateVertexBuffer(types::mesh::VertexType::Texture0, vertexCount, vertexBytes, vertexData);
+				mesh.updateVertexBuffer(types::mesh::VertexType::Normal, vertexCount, vertexBytes, vertexData);
+				mesh.updateElementBuffer(
+					static_cast<uint32_t>(elements.size()),
+					static_cast<uint32_t>(elements.size() * sizeof(ImDrawIdx)),
+					reinterpret_cast<const uint8_t*>(elements.data())
+				);
+			});
 	}
 
 	void ImGuiManager::toggleImGui() {

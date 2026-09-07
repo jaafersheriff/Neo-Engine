@@ -15,8 +15,9 @@ namespace neo {
 		MeshHandle mMeshHandle = NEO_INVALID_HANDLE;
 		ImGui::TextureView mTextureView;
 		glm::uvec4 mScissorRect;
-		uint16_t mElementCount = 0;
-		uint16_t mElementBufferOffset = 0;
+		uint32_t mElementCount = 0;
+		uint32_t mElementBufferOffset = 0;
+		uint32_t mVertexOffset = 0;
 		uint32_t mDrawOrder = 0;
 
 	END_COMPONENT();
