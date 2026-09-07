@@ -49,10 +49,10 @@ namespace neo {
 
 			char name[32] = {};
 			if (named != nullptr) {
-				snprintf(name, sizeof(name), "Neo %s", named);
+				snprintf(name, sizeof(name), "%s Thread", named);
 			}
 			else {
-				snprintf(name, sizeof(name), "Neo Worker %u", threadNum);
+				snprintf(name, sizeof(name), "Worker Thread %u", threadNum);
 			}
 			tracy::SetThreadName(name);
 		}

@@ -408,10 +408,10 @@ namespace neo {
 		{
 			TRACY_ZONEN("Resolve transforms");
 			// Resolve matrices all at once in the base ECS for the render thread's copy to use
-			for (auto&& [entity, spatial] : ecs.getView<SpatialComponent>().each()) {
+			ecs.parallelForEach<SpatialComponent>([](ECS::Entity, SpatialComponent& spatial) {
 				spatial.getModelMatrix();
 				spatial.getNormalMatrix();
-			}
+			});
 			for (auto&& [entity, camera, spatial] : ecs.getView<CameraComponent, SpatialComponent>().each()) {
 				camera.getProj();
 				spatial.getView();
