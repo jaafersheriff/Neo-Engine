@@ -39,7 +39,7 @@ namespace neo {
 	}
 
 	// TODO - instanced
-	void Mesh::draw(uint32_t size, uint16_t offset) const {
+	void Mesh::draw(uint32_t size, uint32_t elementOffset, uint32_t baseVertex) const {
 		// TRACY_ZONE();
 
 		ServiceLocator<Renderer>::ref().mStats.mNumDraws++;
@@ -50,7 +50,13 @@ namespace neo {
 		if (mElementVBO) {
 			uint32_t usedSize = size ? size : mElementVBO->elementCount;
 			ServiceLocator<Renderer>::ref().mStats.mNumPrimitives += usedSize / positions.components;
-			glDrawElements(_translatePrimitive(mPrimitiveType), usedSize, mElementVBO->format, reinterpret_cast<void*>(offset));
+			glDrawElementsBaseVertex(
+				_translatePrimitive(mPrimitiveType),
+				usedSize,
+				mElementVBO->format,
+				reinterpret_cast<void*>(static_cast<uintptr_t>(elementOffset)),
+				static_cast<GLint>(baseVertex)
+			);
 		}
 		else if (size) {
 			ServiceLocator<Renderer>::ref().mStats.mNumPrimitives += size / positions.components;

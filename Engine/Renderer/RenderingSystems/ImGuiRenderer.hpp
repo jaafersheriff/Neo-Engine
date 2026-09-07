@@ -109,7 +109,7 @@ namespace neo {
 				draw.mScissorRect.w
 			);
 
-			resourceManagers.mMeshManager.resolve(draw.mMeshHandle).draw(draw.mElementCount, draw.mElementBufferOffset);
+			resourceManagers.mMeshManager.resolve(draw.mMeshHandle).draw(draw.mElementCount, draw.mElementBufferOffset, draw.mVertexOffset);
 		}
 
 		glDisable(GL_SCISSOR_TEST);
