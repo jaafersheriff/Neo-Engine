@@ -278,7 +278,15 @@ namespace neo {
 			}
 			if (node) {
 				ImGui::Text("[%d, %d]", textureResource.mResource.mWidth, textureResource.mResource.mHeight);
-				textureFunc(handle, 0, 0);
+				int layer = 0;
+				int mip = 0;
+				if (textureResource.mResource.mDepth) {
+					ImGui::SliderInt("Layer", &layer, 0, textureResource.mResource.mDepth);
+				}
+				if (textureResource.mResource.mFormat.mMipCount > 1) {
+					ImGui::SliderInt("Mip", &mip, 0, textureResource.mResource.mFormat.mMipCount - 1);
+				}
+				textureFunc(handle, static_cast<uint32_t>(layer), static_cast<uint32_t>(mip));
 				ImGui::TreePop();
 			}
 			ImGui::PopID();

@@ -54,7 +54,7 @@ namespace neo {
 
 		bool isShuttingDown() const;
 
-		void imguiEditor();
+		void imGuiEditor();
 
 	private:
 		// Hide enkiTS types
