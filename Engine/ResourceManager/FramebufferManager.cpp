@@ -227,9 +227,10 @@ namespace neo {
 							? 0u
 							: static_cast<uint32_t>(it->mTarget) - 1u;
 						textureFunc(it->mTextureHandle, arrayLayer, it->mMip);
-						if (it != std::prev(attachments.end())) {
-							ImGui::SameLine();
-						}
+						// Put all attachments on the same line
+						// if (it != std::prev(attachments.end())) {
+						// 	ImGui::SameLine();
+						// }
 					}
 				}
 			});

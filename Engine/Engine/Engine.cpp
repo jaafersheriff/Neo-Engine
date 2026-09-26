@@ -133,7 +133,6 @@ namespace neo {
 								TRACY_ZONEN("Engine ImGui");
 								ecs._imguiEdtor();
 								resourceManagers._imguiEditor();
-								ServiceLocator<JobSystem>::ref().imguiEditor();
 								ServiceLocator<ImGuiManager>::ref().imGuiEditor();
 								ServiceLocator<Renderer>::ref()._imGuiEditor(mWindow, ecs, resourceManagers);
 								profiler.imGuiEditor();
@@ -429,6 +428,11 @@ namespace neo {
 		TRACY_ZONE();
 
 		ImGui::Begin("Engine");
+		if (ImGui::TreeNodeEx("Jobs", ImGuiTreeNodeFlags_DefaultOpen)) {
+			ServiceLocator<JobSystem>::ref().imGuiEditor();
+			ImGui::TreePop();
+		}
+
 		if (auto hardwareDetails = ecs.getSingleView<MouseComponent, ViewportDetailsComponent>()) {
 			auto&& [entity, mouse, viewport] = hardwareDetails.value();
 			if (ImGui::TreeNodeEx("Window", ImGuiTreeNodeFlags_DefaultOpen)) {

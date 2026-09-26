@@ -176,6 +176,7 @@ namespace neo {
 		case types::texture::Target::TextureCube:
 			mWidth = dimension.x;
 			mHeight = dimension.y;
+			mDepth = 6;
 			break;
 		case types::texture::Target::TextureCubeArray:
 			mWidth = dimension.x;

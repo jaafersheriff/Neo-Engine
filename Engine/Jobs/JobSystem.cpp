@@ -74,12 +74,10 @@ namespace neo {
 			mutable std::mutex mMutex;
 			std::condition_variable mDone;
 			uint32_t mCount = 0;
-			uint32_t mHighWater = 0;
 
 			void begin() {
 				std::lock_guard<std::mutex> lock(mMutex);
 				++mCount;
-				mHighWater = std::max(mHighWater, mCount);
 			}
 
 			void complete() {
@@ -290,46 +288,12 @@ namespace neo {
 		return mImpl->mScheduler.GetIsShutdownRequested();
 	}
 
-	void JobSystem::imguiEditor() {
-		TRACY_ZONE();
-
-		ImGui::Begin("Jobs");
-
-		ImGui::Text("%u threads: 1 main, %u workers, %u job", numThreads(), numWorkers(), kPinnedThreadCount);
+	void JobSystem::imGuiEditor() {
+		ImGui::Text("%u threads: 1 main, %u workers, %u pinned", numThreads(), numWorkers(), kPinnedThreadCount);
 		for (uint8_t i = 0; i < static_cast<uint8_t>(PinnedThread::COUNT); ++i) {
 			const PinnedThread thread = static_cast<PinnedThread>(i);
 			ImGui::BulletText("%s: %u", jobThreadName(thread), threadIndexOf(thread));
 		}
-		ImGui::Text("This thread: %u", threadIndex());
-
-		ImGui::Separator();
-		ImGui::Text("Detached jobs in flight: %u (high water %u)", detachedCount(), mImpl->mDetached.mHighWater);
-		if (ImGui::Button("Fire detached job (500ms)")) {
-			run([] { std::this_thread::sleep_for(std::chrono::milliseconds(500)); }, JobPriority::Low);
-		}
-
-		ImGui::Separator();
-		if (ImGui::Button("Fire test parallelFor")) {
-			std::fill(mImpl->mTestBatchesPerThread.begin(), mImpl->mTestBatchesPerThread.end(), 0u);
-			// One bump per batch, bucketed by thread - the same shape every wide loop will use, so this
-			// exercises the per-thread accumulation as well as the split.
-			parallelFor(1u << 20, 4096, [this](uint32_t, uint32_t, uint32_t threadIdx) {
-				mImpl->mTestBatchesPerThread[threadIdx]++;
-			});
-		}
-		uint32_t totalBatches = 0;
-		uint32_t threadsUsed = 0;
-		for (uint32_t batches : mImpl->mTestBatchesPerThread) {
-			totalBatches += batches;
-			threadsUsed += batches > 0 ? 1u : 0u;
-		}
-		ImGui::Text("Last test: %u batches across %u threads", totalBatches, threadsUsed);
-		for (uint32_t i = 0; i < mImpl->mTestBatchesPerThread.size(); ++i) {
-			if (mImpl->mTestBatchesPerThread[i] > 0) {
-				ImGui::BulletText("thread %u: %u batches", i, mImpl->mTestBatchesPerThread[i]);
-			}
-		}
-
-		ImGui::End();
+		ImGui::Text("Detached jobs in flight: %u", detachedCount());
 	}
 }

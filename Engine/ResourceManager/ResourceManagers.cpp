@@ -45,11 +45,10 @@ namespace neo {
 			case types::texture::Target::Texture2DArray:
 			case types::texture::Target::TextureCube:
 			case types::texture::Target::Texture3D:
-				if (arrayLayer) {
+				if (texture->mDepth) {
 					ImGui::Text("Layer: %d", arrayLayer);
 				}
-				if (mipLevel) {
-					ImGui::SameLine();
+				if (texture->mFormat.mMipCount > 1) {
 					ImGui::Text("Mip: %d", mipLevel);
 				}
 				break;
