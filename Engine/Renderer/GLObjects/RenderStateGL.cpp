@@ -2,6 +2,7 @@
 
 #include "Renderer/GLObjects/RenderStateGL.hpp"
 #include <GL/glew.h>
+#include "Util/Assert.hpp"
 
 namespace neo {
 	void applyRenderState(const RenderState& renderState, const glm::uvec2& viewport) {

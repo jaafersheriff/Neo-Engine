@@ -3,6 +3,8 @@
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
 
 #include "GLFW/glfw3.h"
+#include "Util/Util.hpp"
+#include <ext/imgui_incl.hpp>
 
 namespace neo {
 

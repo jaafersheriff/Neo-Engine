@@ -4,6 +4,8 @@
 #include "Renderer/GLObjects/GLHelper.hpp"
 
 #include "GL/glew.h"
+#include "Util/Assert.hpp"
+#include "Util/Log/Log.hpp"
 
 namespace neo {
 	namespace {
