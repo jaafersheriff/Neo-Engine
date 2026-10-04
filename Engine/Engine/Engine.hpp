@@ -2,7 +2,6 @@
 
 #include "Renderer/Renderer.hpp"
 #include "Jobs/JobHandle.hpp"
-#include "Util/Util.hpp"
 
 #include "ECS/ECS.hpp"
 #include "ECS/Systems/CollisionSystems/MouseRaySystem.hpp"

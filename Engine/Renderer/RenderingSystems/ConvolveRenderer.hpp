@@ -15,7 +15,8 @@
 #include "Messaging/Message.hpp"
 #include "Messaging/Messenger.hpp"
 
-#include "Util/Util.hpp"
+#include "Util/Log/Log.hpp"
+#include "Util/HashedString.hpp"
 #include "Util/ServiceLocator.hpp"
 
 #include <tuple>

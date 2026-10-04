@@ -10,7 +10,10 @@
 #include "Renderer/GLObjects/ShaderBuffer.hpp"
 #include "Renderer/GLObjects/ShaderBarrier.hpp"
 
-#include "Util/Util.hpp"
+#include "Util/Assert.hpp"
+#include "Util/Log/Log.hpp"
+#include "Util/HashedString.hpp"
+#include "Util/Visit.hpp"
 #include "Loader/Loader.hpp"
 
 #include "GLHelper.hpp"

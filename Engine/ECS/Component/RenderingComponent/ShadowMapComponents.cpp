@@ -1,5 +1,7 @@
 #include "ShadowMapComponents.hpp"
 #include "ECS/Component/CameraComponent/CSMCameraComponent.hpp"
+#include "Util/HashedString.hpp"
+#include "Util/MathUtil.hpp"
 
 namespace neo {
 	namespace {

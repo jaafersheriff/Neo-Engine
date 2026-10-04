@@ -8,7 +8,8 @@
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
 #include "ECS/Component/RenderingComponent/SkyboxComponent.hpp"
 
-#include "Util/Util.hpp"
+#include "Util/Assert.hpp"
+#include "Util/HashedString.hpp"
 
 #include <tuple>
 

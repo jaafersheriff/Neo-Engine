@@ -4,6 +4,7 @@
 
 #include "ext/PerlinNoise.hpp"
 #include "ext/par/par_shapes.h"
+#include "Util/MathUtil.hpp"
 
 namespace neo {
 	namespace {

@@ -4,6 +4,10 @@
 #include "Util/Profiler.hpp"
 
 #include <ext/imgui_incl.hpp>
+#include "Util/Assert.hpp"
+#include "Util/Log/Log.hpp"
+#include "Util/HashedString.hpp"
+#include "Util/Visit.hpp"
 
 namespace neo {
 	namespace {

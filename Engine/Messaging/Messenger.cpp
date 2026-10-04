@@ -1,6 +1,6 @@
 #include "Messenger.hpp"
 
-#include "Util/Util.hpp"
+#include "Util/Assert.hpp"
 #include "Util/Profiler.hpp"
 
 namespace neo {

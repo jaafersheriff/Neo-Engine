@@ -1,6 +1,7 @@
 #pragma once
 
-#include "Util/Util.hpp"
+#include "Util/Assert.hpp"
+#include "Util/HashedString.hpp"
 
 #define _CAT(X,Y) _CAT2(X,Y)
 #define _CAT2(X,Y) X##Y

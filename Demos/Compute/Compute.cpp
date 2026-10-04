@@ -20,6 +20,8 @@
 #include "ResourceManager/ResourceManagers.hpp"
 
 #include "ECS/Systems/CameraSystems/CameraControllerSystem.hpp"
+#include "Util/Assert.hpp"
+#include "Util/MathUtil.hpp"
 
 using namespace neo;
 

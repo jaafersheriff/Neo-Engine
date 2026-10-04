@@ -1,6 +1,8 @@
 #include "FireworkComponent.hpp"
 
 #include <ext/imgui_incl.hpp>
+#include "Util/HashedString.hpp"
+#include "Util/MathUtil.hpp"
 
 using namespace neo;
 

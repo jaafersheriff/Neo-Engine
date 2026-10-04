@@ -5,7 +5,7 @@
 #include "Engine/ImGuiManager.hpp"
 
 #include "Util/ServiceLocator.hpp"
-#include "Util/Util.hpp"
+#include "Util/Log/Log.hpp"
 
 #include <chrono>
 
