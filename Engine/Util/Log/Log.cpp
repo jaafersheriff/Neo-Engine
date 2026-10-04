@@ -14,11 +14,28 @@
 namespace neo {
 	namespace util {
 		namespace {
+			struct SeverityData {
+				char mTag;
+				LogColor mColor;
+			};
+			// Indexed by LogSeverity
+			constexpr SeverityData kSeverityData[] = {
+				{ 'V', { 0.26f, 0.4f, 0.32f } },
+				{ 'I', { 0.09f, 0.67f, 0.39f } },
+				{ 'W', { 1.0f, 1.0f, 0.0f } },
+				{ 'E', { 1.0f, 0.2f, 0.2f } },
+			};
+			static_assert(ARRAYSIZE(kSeverityData) == static_cast<int>(LogSeverity::Error) + 1, "Missing severity data");
+
 			double _logTimestamp() {
 				using namespace std::chrono;
 				static const steady_clock::time_point start = steady_clock::now();
 				return duration_cast<duration<double>>(steady_clock::now() - start).count();
 			}
+		}
+
+		LogColor logSeverityColor(LogSeverity severity) {
+			return kSeverityData[static_cast<int>(severity)].mColor;
 		}
 
 		void stringifyByteSize(uint32_t byteSize, char* outStr, size_t outStrSize) {
@@ -50,10 +67,10 @@ namespace neo {
 				char buf[2048];
 
 				if (severity != neo::util::LogSeverity::Error) {
-					sprintf(buf, "%0.4f [%c] (%s): %s\n", _logTimestamp(), sLogSeverityData.at(severity).first, sig, inbuf);
+					sprintf(buf, "%0.4f [%c] (%s): %s\n", _logTimestamp(), kSeverityData[static_cast<int>(severity)].mTag, sig, inbuf);
 				}
 				else {
-					sprintf(buf, "%0.4f [%c]: %s\n", _logTimestamp(), sLogSeverityData.at(severity).first, inbuf);
+					sprintf(buf, "%0.4f [%c]: %s\n", _logTimestamp(), kSeverityData[static_cast<int>(severity)].mTag, inbuf);
 				}
 
 #ifdef DEBUG_MODE
