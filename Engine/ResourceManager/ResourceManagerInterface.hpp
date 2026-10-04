@@ -1,6 +1,7 @@
 #pragma once
 
-#include "Util/Util.hpp"
+#include "Util/Assert.hpp"
+#include "Util/HashedString.hpp"
 
 #include "Jobs/JobThread.hpp"
 #include "ResourceManager/ResourceCache.hpp"

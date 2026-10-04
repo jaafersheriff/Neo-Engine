@@ -1,6 +1,6 @@
 #include "Util/pch.hpp"
 
-#include "Util/Util.hpp"
+#include "Util/Log/Log.hpp"
 
 #include "Profiler.hpp"
 

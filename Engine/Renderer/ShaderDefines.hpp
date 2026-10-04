@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Util/Util.hpp"
+#include "Util/HashedString.hpp"
 
 #include <map>
 #include <string>

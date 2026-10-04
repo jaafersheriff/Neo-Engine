@@ -11,7 +11,8 @@
 #include "Hardware/WindowSurface.hpp"
 #include "Hardware/Mouse.hpp"
 
-#include "Util/Util.hpp"
+#include "Util/Assert.hpp"
+#include "Util/HashedString.hpp"
 #include "Util/Profiler.hpp"
 #include "Util/Log/Log.hpp"
 #include "Util/ServiceLocator.hpp"

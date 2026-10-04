@@ -45,6 +45,9 @@ extern "C" {
 #include <iostream>
 
 #include <GLFW/glfw3.h>
+#include "Util/Assert.hpp"
+#include "Util/HashedString.hpp"
+#include "Util/MathUtil.hpp"
 
 namespace neo {
 

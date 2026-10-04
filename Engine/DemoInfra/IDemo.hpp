@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Util/Util.hpp"
+#include "Util/Assert.hpp"
 #include <string>
 
 #include "ResourceManager/TextureManager.hpp"

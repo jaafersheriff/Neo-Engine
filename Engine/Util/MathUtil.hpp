@@ -1,32 +1,13 @@
 #pragma once
 
-#include "Util/Assert.hpp"
-#include "Util/Log/Log.hpp"
-
 #include <glm/glm.hpp>
 #include <glm/gtc/constants.hpp>
 
-#include <ext/entt_incl.hpp>
-#include <entt/core/hashed_string.hpp>
-
-#include <fstream>
+#include <cmath>
+#include <cstdlib>
 
 namespace neo {
-
-	using HashedString = entt::hashed_string;
-
 	namespace util {
-
-		// https://en.cppreference.com/w/cpp/utility/variant/visit
-		template<class... Ts>
-		struct VisitOverloaded : Ts... { using Ts::operator()...; };
-		template<class... Ts>
-		VisitOverloaded(Ts...) -> VisitOverloaded<Ts...>;
-
-		template <class T, class... Ts>
-		constexpr auto visit(T&& t, Ts&&... funcs) {
-			return std::visit(VisitOverloaded{std::forward<Ts>(funcs)...}, t);
-		}
 
 		static const float PI = glm::pi<float>();
 		static const float EP = static_cast<float>(1e-4);
@@ -84,59 +65,6 @@ namespace neo {
 
 		static inline glm::vec3 sphericalToCartesian(const glm::vec3& v) {
 			return sphericalToCartesian(v.x, v.y, v.z);
-		}
-
-		static inline bool fileExists(const char* path) {
-			std::ifstream f(path);
-			return f.good();
-		}
-
-		static inline char* textFileRead(const char* fn) {
-			FILE* fp;
-			char* content = NULL;
-			int count = 0;
-			if (fn != NULL) {
-				fp = fopen(fn, "rt");
-				if (fp != NULL) {
-					fseek(fp, 0, SEEK_END);
-					count = (int)ftell(fp);
-					rewind(fp);
-					if (count > 0) {
-						content = new char[count + 1];
-						count = (int)fread(content, sizeof(char), count, fp);
-						content[count] = '\0';
-					}
-					fclose(fp);
-				}
-				else {
-					printf("error loading %s\n", fn);
-				}
-			}
-			return content;
-		}
-
-		static inline int textFileWrite(const char* fn, char* s) {
-			FILE* fp;
-			int status = 0;
-			if (fn != NULL) {
-				fopen_s(&fp, fn, "w");
-				if (fp != NULL) {
-					if (fwrite(s, sizeof(char), strlen(s), fp) == strlen(s)) {
-						status = 1;
-					}
-					fclose(fp);
-				}
-			}
-			return(status);
-		}
-
-
-		static inline time_t getFileModTime(const char* fn) {
-			struct stat fileInfo;
-			if (stat(fn, &fileInfo) == 0) {
-				return fileInfo.st_mtime;
-			}
-			return 0;
 		}
 	}
 }

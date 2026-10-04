@@ -2,7 +2,7 @@
 #include "Renderer/RenderThread.hpp"
 
 #include "Util/Profiler.hpp"
-#include "Util/Util.hpp"
+#include "Util/Assert.hpp"
 
 namespace neo {
 

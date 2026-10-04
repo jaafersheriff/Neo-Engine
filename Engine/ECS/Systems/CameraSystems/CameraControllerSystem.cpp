@@ -8,6 +8,8 @@
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
 
 #include <GLFW/glfw3.h>
+#include "Util/Assert.hpp"
+#include "Util/MathUtil.hpp"
 
 namespace neo {
 

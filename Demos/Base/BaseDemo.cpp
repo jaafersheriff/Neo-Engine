@@ -27,6 +27,9 @@
 #include "glm/gtc/matrix_transform.hpp"
 
 #include "ECS/Component/RenderingComponent/LineMeshComponent.hpp"
+#include "Util/Assert.hpp"
+#include "Util/HashedString.hpp"
+#include "Util/MathUtil.hpp"
 
 using namespace neo;
 

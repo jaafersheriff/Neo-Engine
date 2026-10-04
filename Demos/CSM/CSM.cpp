@@ -40,6 +40,9 @@
 #include "ResourceManager/ResourceManagers.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
+#include "Util/Assert.hpp"
+#include "Util/HashedString.hpp"
+#include "Util/MathUtil.hpp"
 
 using namespace neo;
 

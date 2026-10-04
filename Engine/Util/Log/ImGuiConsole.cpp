@@ -1,7 +1,8 @@
 #include "Util/pch.hpp"
 #include "ImGuiConsole.hpp"
 
-#include "Util/Util.hpp"
+#include "Util/Assert.hpp"
+#include "Util/Log/Log.hpp"
 #include "Util/Profiler.hpp"
 
 namespace neo {

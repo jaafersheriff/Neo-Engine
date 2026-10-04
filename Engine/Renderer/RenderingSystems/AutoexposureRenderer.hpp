@@ -10,7 +10,7 @@
 
 #include "ResourceManager/ResourceManagers.hpp"
 
-#include "Util/Util.hpp"
+#include "Util/MathUtil.hpp"
 
 #include <tuple>
 

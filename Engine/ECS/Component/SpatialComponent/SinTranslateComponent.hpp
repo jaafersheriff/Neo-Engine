@@ -2,6 +2,7 @@
 
 #include "ECS/Component/Component.hpp"
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
+#include "Util/MathUtil.hpp"
 
 namespace neo {
 

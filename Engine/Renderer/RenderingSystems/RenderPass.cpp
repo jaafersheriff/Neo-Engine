@@ -4,6 +4,8 @@
 #include "Renderer/GLObjects/RenderStateGL.hpp"
 
 #include "RenderPass.hpp"
+#include "Util/Log/Log.hpp"
+#include "Util/Visit.hpp"
 
 namespace neo {
 

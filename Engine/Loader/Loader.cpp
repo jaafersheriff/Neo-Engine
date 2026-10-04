@@ -7,6 +7,8 @@
 
 #pragma warning(push)
 #include <stb_image.h>
+#include "Util/Log/Log.hpp"
+#include "Util/FileUtil.hpp"
 #pragma warning(pop)
 
 namespace neo {

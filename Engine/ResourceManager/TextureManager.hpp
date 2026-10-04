@@ -3,7 +3,6 @@
 #include "ResourceManagerInterface.hpp"
 #include "Renderer/GLObjects/Texture.hpp"
 
-#include "Util/Util.hpp"
 
 #include <string>
 #include <variant>

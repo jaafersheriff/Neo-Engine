@@ -7,7 +7,7 @@
 
 #include "ECS/ECS.hpp"
 
-#include "Util/Util.hpp"
+#include "Util/Assert.hpp"
 
 #include <glm/glm.hpp>
 
