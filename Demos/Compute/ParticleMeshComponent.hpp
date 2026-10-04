@@ -11,7 +11,6 @@
 #include "Util/ServiceLocator.hpp"
 
 #include <ext/imgui_incl.hpp>
-#include <tracy/TracyOpenGL.hpp>
 
 using namespace neo;
 
