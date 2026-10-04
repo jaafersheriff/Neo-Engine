@@ -26,7 +26,7 @@ namespace neo {
 		/* Init GLFW */
 		NEO_ASSERT(glfwInit(), "Error initializing GLFW");
 
-		glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+		glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
 		glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 		glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_TRUE);
 		glfwWindowHint(GLFW_DEPTH_BITS, 0);
@@ -37,7 +37,7 @@ namespace neo {
 		glfwWindowHint(GLFW_SRGB_CAPABLE, GLFW_TRUE);
 
 #ifdef DEBUG_MODE
-		glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GL_TRUE);
+		glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
 #endif
 
 		const GLFWvidmode* mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
