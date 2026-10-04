@@ -16,6 +16,8 @@ namespace neo {
 
 		void computePass(DrawFunction draw, std::optional<std::string> debugName = std::nullopt);
 
+		void blit(FramebufferHandle src, FramebufferHandle dst, const glm::uvec2& dimension, types::framebuffer::AttachmentBits attachments, std::optional<std::string> debugName = std::nullopt);
+
 	private:
 		void _execute(const ResourceManagers& resourceManagers, const ECS& ecs, bool wireframe);
 		bool mWireframeOverride = false;
@@ -37,6 +39,13 @@ namespace neo {
 			glm::vec4 mClearColor;
 			std::optional<std::string> mDebugName;
 		};
-		std::vector<std::variant<ComputePass, RenderPass, ClearPass>> mPasses;
+		struct BlitPass {
+			FramebufferHandle mSrc;
+			FramebufferHandle mDst;
+			glm::uvec2 mDimension;
+			types::framebuffer::AttachmentBits mAttachments;
+			std::optional<std::string> mDebugName;
+		};
+		std::vector<std::variant<ComputePass, RenderPass, ClearPass, BlitPass>> mPasses;
 	};
 }

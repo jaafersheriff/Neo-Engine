@@ -80,20 +80,7 @@ namespace neo {
 			resourceManagers.mTextureManager
 		);
 
-		// use compute pass to avoid useless/invalid overhead of renderpasses
-		renderPasses.computePass([inputTarget, outputTarget, dimension](const ResourceManagers& resourceManagers, const ECS&) {
-			if (resourceManagers.mFramebufferManager.isValid(inputTarget) && resourceManagers.mFramebufferManager.isValid(outputTarget)) {
-				const Framebuffer& inputFramebuffer = resourceManagers.mFramebufferManager.resolve(inputTarget);
-				const Framebuffer& outputFramebuffer = resourceManagers.mFramebufferManager.resolve(outputTarget);
-				glBlitNamedFramebuffer(inputFramebuffer.mFBOID, outputFramebuffer.mFBOID,
-					0, 0, dimension.x, dimension.y,
-					0, 0, dimension.x, dimension.y,
-					GL_DEPTH_BUFFER_BIT,
-					GL_NEAREST
-				);
-			}
-		}, "Depth blit");
-
+		renderPasses.blit(inputTarget, outputTarget, dimension, types::framebuffer::AttachmentBit::Depth, "Depth blit");
 
 	}
 }
