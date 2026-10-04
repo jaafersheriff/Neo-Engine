@@ -23,6 +23,8 @@ namespace neo {
 
 		void bind() const;
 		void clear(glm::vec4 clearColor, types::framebuffer::AttachmentBits clearFlags) const;
+		// Copies the given attachments into dst, texel for texel
+		void blit(const Framebuffer& dst, glm::uvec2 dimension, types::framebuffer::AttachmentBits attachments) const;
 
 		void init(const std::optional<std::string>& debugName);
 		void disableDraw() const;

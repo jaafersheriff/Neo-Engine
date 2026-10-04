@@ -23,7 +23,7 @@ namespace {
 
 namespace neo {
 	namespace {
-		GLbitfield _getGLClearFlags(types::framebuffer::AttachmentBits flagBits) {
+		GLbitfield _getGLBufferBits(types::framebuffer::AttachmentBits flagBits) {
 			GLbitfield flags = 0;
 			if (flagBits.mClearBits & static_cast<uint8_t>(types::framebuffer::AttachmentBit::Color)) {
 				flags |= GL_COLOR_BUFFER_BIT;
@@ -129,7 +129,16 @@ namespace neo {
 
 	void Framebuffer::clear(glm::vec4 clearColor, types::framebuffer::AttachmentBits clearFlags) const {
 		glClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
-		glClear(_getGLClearFlags(clearFlags));
+		glClear(_getGLBufferBits(clearFlags));
+	}
+
+	void Framebuffer::blit(const Framebuffer& dst, glm::uvec2 dimension, types::framebuffer::AttachmentBits attachments) const {
+		glBlitNamedFramebuffer(mFBOID, dst.mFBOID,
+			0, 0, dimension.x, dimension.y,
+			0, 0, dimension.x, dimension.y,
+			_getGLBufferBits(attachments),
+			GL_NEAREST
+		);
 	}
 
 	void Framebuffer::destroy() {

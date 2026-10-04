@@ -35,6 +35,16 @@ namespace neo {
 		});
 	}
 
+	void RenderPasses::blit(FramebufferHandle src, FramebufferHandle dst, const glm::uvec2& dimension, types::framebuffer::AttachmentBits attachments, std::optional<std::string> debugName) {
+		mPasses.emplace_back(BlitPass{
+			src,
+			dst,
+			dimension,
+			attachments,
+			debugName
+		});
+	}
+
 	void RenderPasses::_execute(const ResourceManagers& resourceManagers, const ECS& ecs, bool wireframe) {
 
 		TRACY_GPU();
@@ -69,6 +79,20 @@ namespace neo {
 					}
 					resourceManagers.mFramebufferManager.resolve(clearPass.mTarget).bind();
 					resourceManagers.mFramebufferManager.resolve(clearPass.mTarget).clear(clearPass.mClearColor, clearPass.mClearFlags);
+
+				},
+				[&](const BlitPass& blitPass) {
+
+					TRACY_GPUN("Blit");
+					if (!resourceManagers.mFramebufferManager.isValid(blitPass.mSrc) || !resourceManagers.mFramebufferManager.isValid(blitPass.mDst)) {
+						NEO_LOG_W("Unable to resolve target, skipping blit %s", blitPass.mDebugName.value_or("").c_str());
+						return;
+					}
+					resourceManagers.mFramebufferManager.resolve(blitPass.mSrc).blit(
+						resourceManagers.mFramebufferManager.resolve(blitPass.mDst),
+						blitPass.mDimension,
+						blitPass.mAttachments
+					);
 
 				},
 				[&](auto) { static_assert(always_false_v<T>, "non-exhaustive visitor!"); }
