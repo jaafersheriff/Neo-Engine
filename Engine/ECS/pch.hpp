@@ -1,9 +1,5 @@
 #pragma once
 
-
-#include "Util/Util.hpp"
-#include "Util/Profiler.hpp"
-
 #include <vector>
 #include <unordered_map>
 #include <typeindex>
@@ -17,4 +13,3 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-#include <ext/imgui_incl.hpp>

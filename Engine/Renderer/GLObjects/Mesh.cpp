@@ -5,6 +5,7 @@
 #include "Renderer/Renderer.hpp"
 
 #include "GL/glew.h"
+#include "Util/ServiceLocator.hpp"
 
 namespace neo {
 	namespace {

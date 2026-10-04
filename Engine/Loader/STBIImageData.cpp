@@ -1,5 +1,7 @@
 #include "STBIImageData.hpp"
 
+#include "Util/Assert.hpp"
+
 #pragma warning(push)
 #include <stb_image.h>
 #pragma warning(pop)

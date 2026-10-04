@@ -1,5 +1,7 @@
 #include "ECS/pch.hpp"
 #include "CameraComponent.hpp"
+#include "Util/Assert.hpp"
+#include <ext/imgui_incl.hpp>
 
 namespace neo {
 

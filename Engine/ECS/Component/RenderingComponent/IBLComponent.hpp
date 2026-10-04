@@ -3,6 +3,7 @@
 #include "ECS/Component/Component.hpp"
 
 #include "ResourceManager/TextureManager.hpp"
+#include <ext/imgui_incl.hpp>
 
 namespace neo {
 	class ECS;

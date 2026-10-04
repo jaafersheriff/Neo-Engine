@@ -1,5 +1,6 @@
 #include "ECS/pch.hpp"
 #include "SpatialComponent.hpp"
+#include <ext/imgui_incl.hpp>
 
 // #include "ECS/Messaging/Messenger.hpp"
 

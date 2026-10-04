@@ -2,6 +2,7 @@
 #include "ShaderBarrier.hpp"
 
 #include "GL/glew.h"
+#include "Util/Assert.hpp"
 
 namespace neo {
 	namespace {

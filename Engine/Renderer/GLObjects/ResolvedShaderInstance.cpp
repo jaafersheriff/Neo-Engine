@@ -14,6 +14,7 @@
 #include "Loader/Loader.hpp"
 
 #include "GLHelper.hpp"
+#include "Util/ServiceLocator.hpp"
 
 namespace neo {
 	namespace {
