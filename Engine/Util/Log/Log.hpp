@@ -1,7 +1,7 @@
 #pragma once
 
-#include <glm/glm.hpp>
-#include <map>
+#include <cstddef>
+#include <cstdint>
 
 #ifndef NEO_LOG_S
 	#define NEO_LOG_S(severity, fmt, ...) neo::util::_log(severity, __FUNCTION__, fmt, __VA_ARGS__)
@@ -33,12 +33,11 @@ namespace neo {
 			Error
 		};
 
-		const static std::map<LogSeverity, std::pair<char, glm::vec3>> sLogSeverityData {
-			{ LogSeverity::Verbose, {'V', glm::vec3(0.26f, 0.4f, 0.32f)}},
-			{ LogSeverity::Info,	{'I', glm::vec3(0.09f, 0.67f, 0.39f)}},
-			{ LogSeverity::Warning, {'W', glm::vec3(1.0f, 1.0f, 0.0f)}},
-			{ LogSeverity::Error,   {'E', glm::vec3(1.0f, 0.2f, 0.2f)}},
+		// The console tint for a severity. A plain struct so this header stays free of glm.
+		struct LogColor {
+			float r, g, b;
 		};
+		LogColor logSeverityColor(LogSeverity severity);
 
 		void _log(LogSeverity severity, const char* sig, const char* format, ...);
 

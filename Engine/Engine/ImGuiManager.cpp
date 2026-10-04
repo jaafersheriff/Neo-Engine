@@ -45,11 +45,11 @@ namespace neo {
 		style->ScaleAllSizes(io.FontGlobalScale);
 		ImVec4* colors = style->Colors;
 #define HEXTOIM(x) x >= 0x1000000 ? ImVec4( ((x >> 24) & 0xFF) /255.f, ((x >> 16) & 0xFF)/255.f, ((x >> 8) & 0xFF)/255.f, ((x) & 0xFF)/255.f): ImVec4( ((x >> 16) & 0xFF) /255.f, ((x >> 8) & 0xFF)/255.f, ((x) & 0xFF)/255.f, 1.f) 
-		auto texColglm = util::sLogSeverityData.at(util::LogSeverity::Info).second;
-		auto texColimv = ImVec4(texColglm.x, texColglm.y, texColglm.z, 1.f);
+		auto texCol = util::logSeverityColor(util::LogSeverity::Info);
+		auto texColimv = ImVec4(texCol.r, texCol.g, texCol.b, 1.f);
 		colors[ImGuiCol_Text] = texColimv;
-		auto disabledTexColglm = util::sLogSeverityData.at(util::LogSeverity::Verbose).second;
-		auto disabledTexColimv = ImVec4(disabledTexColglm.x, disabledTexColglm.y, disabledTexColglm.z, 1.f);
+		auto disabledTexCol = util::logSeverityColor(util::LogSeverity::Verbose);
+		auto disabledTexColimv = ImVec4(disabledTexCol.r, disabledTexCol.g, disabledTexCol.b, 1.f);
 		colors[ImGuiCol_TextDisabled] = disabledTexColimv;
 		colors[ImGuiCol_WindowBg] = HEXTOIM(0x070808);
 		colors[ImGuiCol_Border] = HEXTOIM(0x434343);

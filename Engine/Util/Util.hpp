@@ -3,6 +3,7 @@
 #include "Util/Assert.hpp"
 #include "Util/Log/Log.hpp"
 
+#include <glm/glm.hpp>
 #include <glm/gtc/constants.hpp>
 
 #include <ext/entt_incl.hpp>
