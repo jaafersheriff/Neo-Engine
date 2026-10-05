@@ -13,6 +13,7 @@
 #include "Util/MathUtil.hpp"
 
 #include <tuple>
+#include "HAL/GpuScope.hpp"
 
 namespace neo {
 

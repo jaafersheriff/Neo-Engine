@@ -1,6 +1,7 @@
 #include "ResourceManager/ResourceManagers.hpp"
 
 #include <ext/imgui_incl.hpp>
+#include "HAL/GpuScope.hpp"
 
 namespace neo {
 

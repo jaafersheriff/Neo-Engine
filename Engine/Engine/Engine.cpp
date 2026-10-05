@@ -9,6 +9,7 @@ extern "C" {
 #include "Engine.hpp"
 
 #include "Renderer/Renderer.hpp"
+#include "GLBackend/GLDevice.hpp"
 
 #include "ECS/Component/CameraComponent/MainCameraComponent.hpp"
 #include "ECS/Component/CameraComponent/CameraComponent.hpp"
@@ -191,7 +192,7 @@ namespace neo {
 								ServiceLocator<Renderer>::ref().render(mWindow, &demo, profiler, renderECS, resourceManagers);
 
 								mWindow.flip();
-								TracyGpuCollect;
+								GLDevice::collectGpuProfile();
 							});
 						Messenger::relayMessages(ecs);
 					}

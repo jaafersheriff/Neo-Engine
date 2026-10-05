@@ -5,6 +5,8 @@
 #include "Util/Assert.hpp"
 #include "Util/Profiler.hpp"
 
+#include <GL/glew.h>
+
 namespace {
 	void checkFrameBuffer() {
 		GLenum err = glCheckFramebufferStatus(GL_FRAMEBUFFER);

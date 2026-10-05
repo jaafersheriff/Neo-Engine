@@ -9,6 +9,7 @@ namespace neo {
 
 		void init(RendererDetails& details);
 		void applyDefaultState();
+		void collectGpuProfile();
 	}
 
 }

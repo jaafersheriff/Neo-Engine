@@ -2,6 +2,7 @@
 
 #include "ECS/ECS.hpp"
 #include "Util/Profiler.hpp"
+#include "HAL/GpuScope.hpp"
 
 #include "DeferredPBRRenderComponent.hpp"
 

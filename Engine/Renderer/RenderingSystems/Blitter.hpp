@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Util/Profiler.hpp"
+#include "HAL/GpuScope.hpp"
 
 #include "GLBackend/SourceShader.hpp"
 #include "GLBackend/Framebuffer.hpp"

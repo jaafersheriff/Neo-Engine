@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Util/Profiler.hpp"
+#include "HAL/GpuScope.hpp"
 
 #include "ECS/ECS.hpp"
 #include "ECS/Component/CameraComponent/CSMCameraComponent.hpp"

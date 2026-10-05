@@ -43,6 +43,7 @@
 #include "Util/Assert.hpp"
 #include "Util/HashedString.hpp"
 #include "Util/MathUtil.hpp"
+#include "HAL/GpuScope.hpp"
 
 using namespace neo;
 

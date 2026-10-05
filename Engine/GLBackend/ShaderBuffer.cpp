@@ -6,6 +6,7 @@
 #include "GL/glew.h"
 #include "Util/Assert.hpp"
 #include "Util/Profiler.hpp"
+#include "HAL/GpuScope.hpp"
 
 namespace neo {
 

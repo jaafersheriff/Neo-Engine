@@ -8,28 +8,9 @@
 #define TracyLine _CAT(__LINE__,U)
 #include <tracy/Tracy.hpp>
 
-#include <GL/glew.h>
-#include <tracy/TracyOpenGL.hpp>
 #define TRACY_ZONEN(x) ZoneScopedNC(x, (neo::HashedString(x) & 0xfefefe) >> 1 )
 #define TRACY_ZONE() TRACY_ZONEN(TracyFunction)
 
-
-struct _NEO_GPU_SCOPE {
-	_NEO_GPU_SCOPE(const char* name) {
-#ifdef DEBUG_MODE
-		glPushDebugGroup(GL_DEBUG_SOURCE_APPLICATION, 0, static_cast<GLsizei>(-1), name);
-#else
-		NEO_UNUSED(name);
-#endif
-	}
-	~_NEO_GPU_SCOPE() {
-#ifdef DEBUG_MODE
-		glPopDebugGroup();
-#endif
-	}
-};
-#define TRACY_GPUN(x) TRACY_ZONEN(x); TracyGpuZoneC(x, (neo::HashedString(x) & 0xfefefe) >> 1 ); _NEO_GPU_SCOPE ___NEO_GPU_SCOPE##__LINE__(x)
-#define TRACY_GPU() TRACY_GPUN(TracyFunction)
 
 #include <memory>
 #include <vector>
@@ -41,26 +22,6 @@ namespace neo {
 
 		class Profiler {
 		public:
-			struct GPUQuery {
-
-				void init();
-				float getGPUTime() const;
-				uint32_t tickHandle();
-				void destroy();
-
-				// Scoped or manual
-				struct Scope {
-					Scope(uint32_t handle);
-					~Scope();
-				};
-
-			private:
-				bool _handlesValid() const;
-
-				std::array<uint32_t, 2> mHandles = { 0,0 };
-				bool mUseHandle0 = true; // Double buffer
-			};
-
 			Profiler(int refreshRate);
 			~Profiler();
 			Profiler(const Profiler&) = delete;

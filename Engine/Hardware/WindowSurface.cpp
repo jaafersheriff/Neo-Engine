@@ -9,6 +9,7 @@
 #include "HAL/RenderDetails.hpp"
 
 #include "Util/Profiler.hpp"
+#include "HAL/GpuScope.hpp"
 #include <GLFW/glfw3.h>
 
 namespace neo {
