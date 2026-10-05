@@ -32,6 +32,7 @@
 #include "glm/gtc/matrix_transform.hpp"
 
 #include "ECS/Component/RenderingComponent/LineMeshComponent.hpp"
+#include "Loader/Loader.hpp"
 
 using namespace neo;
 

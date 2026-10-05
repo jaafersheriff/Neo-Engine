@@ -24,7 +24,6 @@
 #include "Messaging/Message.hpp"
 #include "Messaging/Messenger.hpp"
 
-#include "Engine/Engine.hpp"
 #include "Engine/ImGuiManager.hpp"
 #include "Hardware/WindowSurface.hpp"
 

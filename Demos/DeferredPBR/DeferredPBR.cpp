@@ -38,6 +38,7 @@
 
 #include "glm/gtc/matrix_transform.hpp"
 #include "HAL/GpuScope.hpp"
+#include "Loader/Loader.hpp"
 
 using namespace neo;
 

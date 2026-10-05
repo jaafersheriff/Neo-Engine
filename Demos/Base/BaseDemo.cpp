@@ -30,6 +30,7 @@
 #include "Util/Assert.hpp"
 #include "Util/HashedString.hpp"
 #include "Util/MathUtil.hpp"
+#include "Loader/Loader.hpp"
 
 using namespace neo;
 
