@@ -128,11 +128,13 @@ namespace neo {
 	}
 
 	void Framebuffer::clear(glm::vec4 clearColor, types::framebuffer::AttachmentBits clearFlags) const {
+		glDisable(GL_SCISSOR_TEST);
 		glClearColor(clearColor.r, clearColor.g, clearColor.b, clearColor.a);
 		glClear(_getGLBufferBits(clearFlags));
 	}
 
 	void Framebuffer::blit(const Framebuffer& dst, glm::uvec2 dimension, types::framebuffer::AttachmentBits attachments) const {
+		glDisable(GL_SCISSOR_TEST);
 		glBlitNamedFramebuffer(mFBOID, dst.mFBOID,
 			0, 0, dimension.x, dimension.y,
 			0, 0, dimension.x, dimension.y,
