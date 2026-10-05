@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Renderer/RenderingSystems/RenderState.hpp"
+#include "HAL/RenderState.hpp"
 
 namespace neo {
 	void applyRenderState(const RenderState& renderState, const glm::uvec2& viewport);
