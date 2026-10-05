@@ -9,7 +9,6 @@ PUBLIC
 	entt
 PRIVATE
 	Hardware
-	libglew_static
 	TracyClient
 	imgui
 	glfw

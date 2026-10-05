@@ -9,6 +9,5 @@ PRIVATE
 	entt
 	glm
 	TracyClient
-	libglew_static
 	imgui
 )

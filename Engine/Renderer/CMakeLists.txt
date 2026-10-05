@@ -8,7 +8,6 @@ PUBLIC
 PRIVATE
 	Util
 	glfw
-	libglew_static
 	imgui
 	glm
 	entt
