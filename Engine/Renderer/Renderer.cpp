@@ -38,6 +38,7 @@
 #pragma warning( pop )
 
 #include <ImGuizmo.h>
+#include "HAL/GpuScope.hpp"
 
 namespace neo {
 
@@ -95,7 +96,7 @@ namespace neo {
 		}
 
 		profiler.markFrameGPU(mGPUQuery.getGPUTime());
-		util::Profiler::GPUQuery::Scope _scope(mGPUQuery.tickHandle());
+		GpuTimer::Scope _scope(mGPUQuery.tickHandle());
 
 		mStats = {};
 

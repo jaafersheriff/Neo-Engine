@@ -12,6 +12,7 @@
 #include "Util/HashedString.hpp"
 
 #include <tuple>
+#include "HAL/GpuScope.hpp"
 
 namespace neo {
 

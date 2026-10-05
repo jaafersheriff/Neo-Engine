@@ -3,6 +3,7 @@
 #include "Loader/MeshGenerator.hpp"
 
 #include "Util/Profiler.hpp"
+#include "HAL/GpuScope.hpp"
 
 #include <ext/imgui_incl.hpp>
 

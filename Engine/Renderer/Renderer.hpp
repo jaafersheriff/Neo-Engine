@@ -4,6 +4,7 @@
 #include "DemoInfra/IDemo.hpp"
 
 #include "FrameStats.hpp"
+#include "HAL/GpuTimer.hpp"
 #include "HAL/RenderDetails.hpp"
 
 #include "Util/Profiler.hpp"
@@ -61,7 +62,7 @@ namespace neo {
 			// Should be safe - the worst outcome is that isValid() fails and systems gracefully return early
 			TextureHandle mSceneColorTextureHandle;
 
-			util::Profiler::GPUQuery mGPUQuery;
+			GpuTimer mGPUQuery;
 	};
 
 }

@@ -22,6 +22,7 @@
 #include "ECS/Systems/CameraSystems/CameraControllerSystem.hpp"
 #include "Util/Assert.hpp"
 #include "Util/MathUtil.hpp"
+#include "HAL/GpuScope.hpp"
 
 using namespace neo;
 

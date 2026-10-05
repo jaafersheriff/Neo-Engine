@@ -19,6 +19,8 @@
 #include "GLHelper.hpp"
 #include "Util/ServiceLocator.hpp"
 
+#include <GL/glew.h>
+
 namespace neo {
 	namespace {
 		#define GET_FILE_LINE (std::string(__FILE__) + ":" + std::to_string(__LINE__)).c_str()

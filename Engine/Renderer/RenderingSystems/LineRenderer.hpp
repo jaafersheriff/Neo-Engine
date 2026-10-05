@@ -6,6 +6,7 @@
 #include "GLBackend/ResolvedShaderInstance.hpp"
 
 #include "ECS/Component/RenderingComponent/LineMeshComponent.hpp"
+#include "HAL/GpuScope.hpp"
 
 namespace neo {
 

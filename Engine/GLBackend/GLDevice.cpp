@@ -41,6 +41,12 @@ namespace neo {
 			details.mShadingLanguage = reinterpret_cast<const char*>(glGetString(GL_SHADING_LANGUAGE_VERSION));
 		}
 
+		void collectGpuProfile() {
+			NEO_ASSERT(isRenderThread(), "GPU profile collected off the render thread - the GL context belongs to it");
+
+			TracyGpuCollect;
+		}
+
 		void applyDefaultState() {
 			NEO_ASSERT(isRenderThread(), "GL state set off the render thread - the GL context belongs to it");
 

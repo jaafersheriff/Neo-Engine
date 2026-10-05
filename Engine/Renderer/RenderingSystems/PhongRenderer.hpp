@@ -2,6 +2,7 @@
 
 #include "ECS/ECS.hpp"
 #include "Util/Profiler.hpp"
+#include "HAL/GpuScope.hpp"
 
 #include "ECS/Component/RenderingComponent/AlphaTestComponent.hpp"
 #include "ECS/Component/RenderingComponent/PhongRenderComponent.hpp"

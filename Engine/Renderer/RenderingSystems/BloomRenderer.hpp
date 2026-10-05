@@ -5,6 +5,7 @@
 #include "Renderer/RenderingSystems/RenderPass.hpp"
 
 #include "ResourceManager/ResourceManagers.hpp"
+#include "HAL/GpuScope.hpp"
 
 namespace neo {
 

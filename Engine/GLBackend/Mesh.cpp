@@ -6,6 +6,7 @@
 
 #include "GL/glew.h"
 #include "Util/ServiceLocator.hpp"
+#include "HAL/GpuScope.hpp"
 
 namespace neo {
 	namespace {

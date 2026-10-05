@@ -20,6 +20,7 @@
 #include "Util/ServiceLocator.hpp"
 
 #include <tuple>
+#include "HAL/GpuScope.hpp"
 
 namespace neo {
 

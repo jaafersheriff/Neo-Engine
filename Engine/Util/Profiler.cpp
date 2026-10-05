@@ -19,56 +19,6 @@ void operator delete(void* ptr) noexcept {
 
 namespace neo {
 	namespace util {
-		Profiler::GPUQuery::Scope::Scope(uint32_t handle) {
-			glBeginQuery(GL_TIME_ELAPSED, handle);
-		}
-		Profiler::GPUQuery::Scope::~Scope() {
-			glEndQuery(GL_TIME_ELAPSED);
-		}
-
-		void Profiler::GPUQuery::init() {
-			if (!_handlesValid()) {
-				glGenQueries(2, mHandles.data());
-			}
-		}
-
-		float Profiler::GPUQuery::getGPUTime() const {
-			if (!_handlesValid()) {
-				return 0.f;
-			}
-
-			// Retrieve the inactive handle
-			uint32_t handle = mUseHandle0 ? mHandles[1] : mHandles[0];
-
-			int32_t done;
-			glGetQueryObjectiv(handle, GL_QUERY_RESULT_AVAILABLE, &done);
-			if (done) {
-				uint64_t time;
-				glGetQueryObjectui64v(handle, GL_QUERY_RESULT, &time);
-				return time / 1000000.f;
-			}
-
-			NEO_LOG_W("GPU query not done?");
-			return 0.f;
-		}
-
-		uint32_t Profiler::GPUQuery::tickHandle() {
-			mUseHandle0 = !mUseHandle0;
-			return mUseHandle0 ? mHandles[0] : mHandles[1];
-		}
-
-		void Profiler::GPUQuery::destroy() {
-			if (!_handlesValid()) {
-				return;
-			}
-			glDeleteQueries(2, mHandles.data());
-			mHandles = { 0,0 };
-		}
-
-		bool Profiler::GPUQuery::_handlesValid() const {
-			return mHandles[0] && mHandles[1];
-		}
-
 		Profiler::Profiler(int refreshRate) 
 			: mRefreshRate(refreshRate)
 		{

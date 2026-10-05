@@ -14,6 +14,7 @@
 #include "ResourceManager/ResourceManagers.hpp"
 
 #include <glm/gtc/matrix_transform.hpp>
+#include "HAL/GpuScope.hpp"
 
 namespace neo {
 
