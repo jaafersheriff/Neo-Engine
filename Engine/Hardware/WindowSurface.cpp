@@ -6,7 +6,7 @@
 
 #include "Engine/ImGuiManager.hpp"
 #include "Messaging/Messenger.hpp"
-#include "Renderer/RenderDetails.hpp"
+#include "HAL/RenderDetails.hpp"
 
 #include "Util/Profiler.hpp"
 #include <GLFW/glfw3.h>

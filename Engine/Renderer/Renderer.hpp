@@ -4,7 +4,7 @@
 #include "DemoInfra/IDemo.hpp"
 
 #include "FrameStats.hpp"
-#include "RenderDetails.hpp"
+#include "HAL/RenderDetails.hpp"
 
 #include "Util/Profiler.hpp"
 

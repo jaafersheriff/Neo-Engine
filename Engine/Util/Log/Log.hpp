@@ -33,7 +33,6 @@ namespace neo {
 			Error
 		};
 
-		// The console tint for a severity. A plain struct so this header stays free of glm.
 		struct LogColor {
 			float r, g, b;
 		};
