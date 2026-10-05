@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Renderer/GLObjects/SourceShader.hpp"
-#include "Renderer/GLObjects/ResolvedShaderInstance.hpp"
+#include "GLBackend/SourceShader.hpp"
+#include "GLBackend/ResolvedShaderInstance.hpp"
 
 #include "ResourceManager/ResourceManagers.hpp"
 

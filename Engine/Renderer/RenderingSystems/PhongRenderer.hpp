@@ -18,8 +18,8 @@
 #include "ECS/Component/LightComponent/DirectionalLightComponent.hpp"
 #include "ECS/Component/LightComponent/PointLightComponent.hpp"
 
-#include "Renderer/GLObjects/SourceShader.hpp"
-#include "Renderer/GLObjects/ResolvedShaderInstance.hpp"
+#include "GLBackend/SourceShader.hpp"
+#include "GLBackend/ResolvedShaderInstance.hpp"
 
 #include "ResourceManager/ResourceManagers.hpp"
 

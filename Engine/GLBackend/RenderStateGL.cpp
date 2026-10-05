@@ -1,6 +1,6 @@
-#include "Renderer/pch.hpp"
+#include "GLBackend/pch.hpp"
 
-#include "Renderer/GLObjects/RenderStateGL.hpp"
+#include "GLBackend/RenderStateGL.hpp"
 #include <GL/glew.h>
 #include "Util/Assert.hpp"
 

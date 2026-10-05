@@ -14,4 +14,10 @@ INTERFACE
 	${CMAKE_SOURCE_DIR}/Engine
 )
 
+# ShaderDefines.hpp uses HashedString
+target_link_libraries(HAL
+INTERFACE
+	Util
+)
+
 set_target_properties(HAL PROPERTIES FOLDER "Neo")

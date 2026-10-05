@@ -13,8 +13,8 @@
 #include "ECS/Component/LightComponent/LightComponent.hpp"
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
 
-#include "Renderer/GLObjects/ResolvedShaderInstance.hpp"
-#include "Renderer/GLObjects/Framebuffer.hpp"
+#include "GLBackend/ResolvedShaderInstance.hpp"
+#include "GLBackend/Framebuffer.hpp"
 #include "Renderer/RenderingSystems/RenderPass.hpp"
 
 #include "ResourceManager/ResourceManagers.hpp"

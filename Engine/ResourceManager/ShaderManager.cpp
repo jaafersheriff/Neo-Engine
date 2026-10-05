@@ -4,7 +4,7 @@
 
 #include "Loader/Loader.hpp"
 
-#include "Renderer/GLObjects/ResolvedShaderInstance.hpp"
+#include "GLBackend/ResolvedShaderInstance.hpp"
 
 #include "Util/Profiler.hpp"
 #include "Util/ServiceLocator.hpp"

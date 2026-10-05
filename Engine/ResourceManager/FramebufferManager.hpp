@@ -4,7 +4,7 @@
 
 #include "ResourceManager/ResourceManagerInterface.hpp"
 #include "ResourceManager/TextureManager.hpp"
-#include "Renderer/GLObjects/Framebuffer.hpp"
+#include "GLBackend/Framebuffer.hpp"
 
 #include <variant>
 #include <optional>

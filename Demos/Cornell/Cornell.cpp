@@ -19,7 +19,7 @@
 #include "Renderer/RenderingSystems/ForwardPBRRenderer.hpp"
 #include "Renderer/RenderingSystems/PointLightShadowMapRenderer.hpp"
 #include "Renderer/RenderingSystems/FXAARenderer.hpp"
-#include "Renderer/GLObjects/Framebuffer.hpp"
+#include "GLBackend/Framebuffer.hpp"
 
 #include "Loader/MeshGenerator.hpp"
 

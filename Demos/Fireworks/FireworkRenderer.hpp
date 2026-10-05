@@ -11,7 +11,7 @@
 #include "ECS/Component/LightComponent/LightComponent.hpp"
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
 
-#include "Renderer/GLObjects/ResolvedShaderInstance.hpp"
+#include "GLBackend/ResolvedShaderInstance.hpp"
 
 namespace Fireworks {
 	inline void tickParticles(const ResourceManagers& resourceManagers, const ECS& ecs) {

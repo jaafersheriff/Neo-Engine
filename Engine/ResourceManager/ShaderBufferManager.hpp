@@ -2,8 +2,8 @@
 
 #include "ResourceManagerInterface.hpp"
 
-#include "Renderer/GLObjects/ShaderBuffer.hpp"
-#include "Renderer/GLObjects/ShaderBarrier.hpp"
+#include "GLBackend/ShaderBuffer.hpp"
+#include "GLBackend/ShaderBarrier.hpp"
 
 namespace neo {
 	class ResourceManagers;

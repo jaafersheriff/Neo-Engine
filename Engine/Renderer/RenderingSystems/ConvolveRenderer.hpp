@@ -1,8 +1,8 @@
 #pragma once
 
 #include "Renderer/Renderer.hpp"
-#include "Renderer/GLObjects/SourceShader.hpp"
-#include "Renderer/GLObjects/ResolvedShaderInstance.hpp"
+#include "GLBackend/SourceShader.hpp"
+#include "GLBackend/ResolvedShaderInstance.hpp"
 #include "Renderer/RenderingSystems/RenderPass.hpp"
 
 #include "ECS/ECS.hpp"

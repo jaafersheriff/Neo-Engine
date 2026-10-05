@@ -1,7 +1,7 @@
 #include "Renderer/pch.hpp"
 
 #include "Renderer/FrameStats.hpp"
-#include "Renderer/GLObjects/RenderStateGL.hpp"
+#include "GLBackend/RenderStateGL.hpp"
 
 #include "RenderPass.hpp"
 #include "Util/Log/Log.hpp"

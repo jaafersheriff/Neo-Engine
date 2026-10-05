@@ -19,7 +19,7 @@
 
 #include "Renderer/RenderingSystems/WireframeRenderer.hpp"
 #include "Renderer/RenderingSystems/PhongRenderer.hpp"
-#include "Renderer/GLObjects/Framebuffer.hpp"
+#include "GLBackend/Framebuffer.hpp"
 #include "Renderer/RenderingSystems/RenderPass.hpp"
 
 #include "Loader/GLTFImporter.hpp"

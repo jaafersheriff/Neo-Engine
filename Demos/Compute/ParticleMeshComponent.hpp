@@ -2,7 +2,7 @@
 
 #include "ECS/Component/Component.hpp"
 
-#include "Renderer/GLObjects/Mesh.hpp"
+#include "GLBackend/Mesh.hpp"
 #include "Renderer/Renderer.hpp"
 
 #include "ResourceManager/MeshManager.hpp"

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Renderer/GLObjects/Mesh.hpp"
+#include "GLBackend/Mesh.hpp"
 #include "ext/PerlinNoise.hpp"
 
 namespace neo {
