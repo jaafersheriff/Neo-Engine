@@ -1,14 +1,14 @@
-#include "Renderer/pch.hpp"
+#include "GLBackend/pch.hpp"
 
 #include "ResolvedShaderInstance.hpp"
 
 #include "Renderer/Renderer.hpp"
-#include "Renderer/GLObjects/SourceShader.hpp"
-#include "Renderer/GLObjects/GLHelper.hpp"
-#include "Renderer/GLObjects/Texture.hpp"
-#include "Renderer/GLObjects/Mesh.hpp"
-#include "Renderer/GLObjects/ShaderBuffer.hpp"
-#include "Renderer/GLObjects/ShaderBarrier.hpp"
+#include "GLBackend/SourceShader.hpp"
+#include "GLBackend/GLHelper.hpp"
+#include "GLBackend/Texture.hpp"
+#include "GLBackend/Mesh.hpp"
+#include "GLBackend/ShaderBuffer.hpp"
+#include "GLBackend/ShaderBarrier.hpp"
 
 #include "Util/Assert.hpp"
 #include "Util/Log/Log.hpp"

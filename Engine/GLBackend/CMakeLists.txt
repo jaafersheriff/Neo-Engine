@@ -1,20 +1,15 @@
 
 InitLib()
 
-target_link_libraries(Renderer
+target_link_libraries(GLBackend
 PUBLIC
-	GLBackend
 	HAL
-PRIVATE
 	Util
-	glfw
+PRIVATE
 	libglew_static
-	imgui
-	glm
-	entt
 	TracyClient
 )
 
-add_precompiled_header(Renderer
+add_precompiled_header(GLBackend
 	${CMAKE_CURRENT_SOURCE_DIR}/pch.hpp
 	SOURCE_CXX ${CMAKE_CURRENT_SOURCE_DIR}/pch.cpp)

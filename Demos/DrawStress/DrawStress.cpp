@@ -22,7 +22,7 @@
 #include "ECS/Systems/TranslationSystems/RotationSystem.hpp"
 
 #include "Renderer/RenderingSystems/PhongRenderer.hpp"
-#include "Renderer/GLObjects/Framebuffer.hpp"
+#include "GLBackend/Framebuffer.hpp"
 #include "Renderer/RenderingSystems/RenderPass.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"

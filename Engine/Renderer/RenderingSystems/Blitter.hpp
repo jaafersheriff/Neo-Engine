@@ -2,9 +2,9 @@
 
 #include "Util/Profiler.hpp"
 
-#include "Renderer/GLObjects/SourceShader.hpp"
-#include "Renderer/GLObjects/Framebuffer.hpp"
-#include "Renderer/GLObjects/ResolvedShaderInstance.hpp"
+#include "GLBackend/SourceShader.hpp"
+#include "GLBackend/Framebuffer.hpp"
+#include "GLBackend/ResolvedShaderInstance.hpp"
 #include "Renderer/RenderingSystems/RenderPass.hpp"
 
 #include "Loader/Loader.hpp"

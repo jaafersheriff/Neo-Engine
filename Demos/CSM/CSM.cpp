@@ -31,7 +31,7 @@
 #include "ECS/Systems/CameraSystems/CSMFittingSystem.hpp"
 #include "ECS/Systems/TranslationSystems/RotationSystem.hpp"
 
-#include "Renderer/GLObjects/Framebuffer.hpp"
+#include "GLBackend/Framebuffer.hpp"
 #include "Renderer/RenderingSystems/CSMShadowRenderer.hpp"
 #include "Renderer/RenderingSystems/PhongRenderer.hpp"
 #include "Renderer/RenderingSystems/LineRenderer.hpp"

@@ -2,8 +2,8 @@
 
 #include "ResourceManagerInterface.hpp"
 
-#include "Renderer/GLObjects/ResolvedShaderInstance.hpp"
-#include "Renderer/GLObjects/SourceShader.hpp"
+#include "GLBackend/ResolvedShaderInstance.hpp"
+#include "GLBackend/SourceShader.hpp"
 
 #include "Jobs/JobHandle.hpp"
 

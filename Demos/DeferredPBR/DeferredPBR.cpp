@@ -31,8 +31,8 @@
 #include "Renderer/RenderingSystems/FXAARenderer.hpp"
 #include "Renderer/RenderingSystems/SkyboxRenderer.hpp"
 #include "Renderer/RenderingSystems/TonemapRenderer.hpp"
-#include "Renderer/GLObjects/Framebuffer.hpp"
-#include "Renderer/GLObjects/ResolvedShaderInstance.hpp"
+#include "GLBackend/Framebuffer.hpp"
+#include "GLBackend/ResolvedShaderInstance.hpp"
 
 #include "Loader/GLTFImporter.hpp"
 

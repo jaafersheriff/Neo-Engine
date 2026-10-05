@@ -11,7 +11,7 @@
 
 #include "ResourceManager/ResourceManagers.hpp"
 
-#include "Renderer/GLObjects/ResolvedShaderInstance.hpp"
+#include "GLBackend/ResolvedShaderInstance.hpp"
 
 using namespace neo;
 

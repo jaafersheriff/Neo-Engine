@@ -7,9 +7,9 @@
 #include "ECS/Component/RenderingComponent/ShadowMapComponents.hpp"
 #include "ECS/Component/RenderingComponent/ShadowCasterRenderComponent.hpp"
 
-#include "Renderer/GLObjects/SourceShader.hpp"
-#include "Renderer/GLObjects/ResolvedShaderInstance.hpp"
-#include "Renderer/GLObjects/Framebuffer.hpp"
+#include "GLBackend/SourceShader.hpp"
+#include "GLBackend/ResolvedShaderInstance.hpp"
+#include "GLBackend/Framebuffer.hpp"
 
 #include "ResourceManager/ResourceManagers.hpp"
 

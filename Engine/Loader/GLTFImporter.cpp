@@ -1,7 +1,7 @@
 #include "GLTFImporter.hpp"
 
-#include "Renderer/GLObjects/Mesh.hpp"
-#include "Renderer/GLObjects/Texture.hpp"
+#include "GLBackend/Mesh.hpp"
+#include "GLBackend/Texture.hpp"
 
 #include "ECS/ECS.hpp"
 #include "ECS/Component/EngineComponents/TagComponent.hpp"

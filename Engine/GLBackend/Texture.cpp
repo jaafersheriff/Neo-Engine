@@ -1,7 +1,7 @@
-#include "Renderer/pch.hpp"
+#include "GLBackend/pch.hpp"
 #include "Texture.hpp"
 
-#include "Renderer/GLObjects/GLHelper.hpp"
+#include "GLBackend/GLHelper.hpp"
 
 #include "GL/glew.h"
 #include "Util/Assert.hpp"

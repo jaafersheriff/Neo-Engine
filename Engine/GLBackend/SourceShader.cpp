@@ -1,9 +1,9 @@
-#include "Renderer/pch.hpp"
+#include "GLBackend/pch.hpp"
 
 #include "SourceShader.hpp"
 
 #include "Renderer/Renderer.hpp"
-#include "Renderer/GLObjects/ResolvedShaderInstance.hpp"
+#include "GLBackend/ResolvedShaderInstance.hpp"
 
 namespace neo {
 

@@ -5,9 +5,9 @@
 #include "ECS/Component/CameraComponent/CSMCameraComponent.hpp"
 #include "ECS/Component/CameraComponent/FrustumComponent.hpp"
 
-#include "Renderer/GLObjects/SourceShader.hpp"
-#include "Renderer/GLObjects/ResolvedShaderInstance.hpp"
-#include "Renderer/GLObjects/Framebuffer.hpp"
+#include "GLBackend/SourceShader.hpp"
+#include "GLBackend/ResolvedShaderInstance.hpp"
+#include "GLBackend/Framebuffer.hpp"
 
 #include "Renderer/RenderingSystems/RenderPass.hpp"
 

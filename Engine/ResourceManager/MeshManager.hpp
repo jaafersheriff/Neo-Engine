@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ResourceManagerInterface.hpp"
-#include "Renderer/GLObjects/Mesh.hpp"
+#include "GLBackend/Mesh.hpp"
 
 namespace neo {
 	class ResourceManagers;

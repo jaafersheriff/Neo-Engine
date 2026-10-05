@@ -2,10 +2,10 @@
 
 #include "Renderer.hpp"
 
-#include "Renderer/GLObjects/GLHelper.hpp"
-#include "Renderer/GLObjects/SourceShader.hpp"
-#include "Renderer/GLObjects/Framebuffer.hpp"
-#include "Renderer/GLObjects/ResolvedShaderInstance.hpp"
+#include "GLBackend/GLHelper.hpp"
+#include "GLBackend/SourceShader.hpp"
+#include "GLBackend/Framebuffer.hpp"
+#include "GLBackend/ResolvedShaderInstance.hpp"
 #include "Renderer/RenderingSystems/LineRenderer.hpp"
 #include "Renderer/RenderingSystems/Blitter.hpp"
 #include "Renderer/RenderingSystems/ImGuiRenderer.hpp"

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Renderer/GLObjects/SourceShader.hpp"
+#include "GLBackend/SourceShader.hpp"
 
 #include <glm/glm.hpp>
 #include <ext/entt_incl.hpp>

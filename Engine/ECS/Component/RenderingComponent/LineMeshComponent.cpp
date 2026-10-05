@@ -1,7 +1,7 @@
 #include "ECS/pch.hpp"
 #include "ECS/Component/RenderingComponent/LineMeshComponent.hpp"
 
-#include "Renderer/GLObjects/Mesh.hpp"
+#include "GLBackend/Mesh.hpp"
 #include "Messaging/Message.hpp"
 #include "Messaging/Messenger.hpp"
 

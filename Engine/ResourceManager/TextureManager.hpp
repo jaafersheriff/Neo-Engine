@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ResourceManagerInterface.hpp"
-#include "Renderer/GLObjects/Texture.hpp"
+#include "GLBackend/Texture.hpp"
 
 
 #include <string>

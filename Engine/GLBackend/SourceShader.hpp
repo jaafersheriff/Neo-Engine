@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Renderer/GLObjects/GLHelper.hpp"
-#include "Renderer/ShaderDefines.hpp"
+#include "GLBackend/GLHelper.hpp"
+#include "HAL/ShaderDefines.hpp"
 
 #include <sstream>
 #include <set>
