@@ -3,6 +3,7 @@ InitLib()
 
 target_link_libraries(Renderer
 PUBLIC
+	HAL
 PRIVATE
 	Util
 	glfw

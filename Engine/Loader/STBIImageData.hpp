@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Renderer/Types.hpp"
+#include "HAL/Types.hpp"
 #include <string>
 
 namespace neo {

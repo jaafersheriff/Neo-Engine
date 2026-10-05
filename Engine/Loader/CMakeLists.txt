@@ -3,6 +3,7 @@ InitLib()
 
 target_link_libraries(Loader
 PUBLIC
+	HAL
 	tinygltf
 	par
 PRIVATE
