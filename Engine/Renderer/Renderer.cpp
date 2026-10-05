@@ -2,7 +2,7 @@
 
 #include "Renderer.hpp"
 
-#include "GLBackend/GLHelper.hpp"
+#include "GLBackend/GLDevice.hpp"
 #include "GLBackend/SourceShader.hpp"
 #include "GLBackend/Framebuffer.hpp"
 #include "GLBackend/ResolvedShaderInstance.hpp"
@@ -29,7 +29,6 @@
 #include "Hardware/WindowSurface.hpp"
 
 #include <GLFW/glfw3.h>
-#include <tracy/TracyOpenGL.hpp>
 	
 #pragma warning( push )
 #pragma warning( disable : 4201 )
@@ -61,11 +60,7 @@ namespace neo {
 	void Renderer::initGPUContext(WindowSurface& window) {
 		glfwMakeContextCurrent(window.getWindow());
 
-		glewExperimental = GL_FALSE;
-		NEO_ASSERT(glewInit() == GLEW_OK, "Failed to init GLEW");
-
-		// Tracy's GPU context is per-thread and must be created on the thread that issues the queries.
-		TracyGpuContext;
+		GLDevice::init(mDetails);
 
 		{
 			char buf[512];
@@ -84,36 +79,13 @@ namespace neo {
 			bytes = sprintf(buf, "Max Texture Array Layers: %d", mDetails.mMaxTextureArrayLayers);
 			TracyAppInfo(buf, bytes);
 		}
-
-	#ifdef DEBUG_MODE
-		glEnable(GL_DEBUG_OUTPUT);
-		glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
-		glDebugMessageCallback(GLHelper::OpenGLMessageCallback, nullptr);
-		
-		glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, NULL, GL_TRUE);
-		glDebugMessageControl(GL_DEBUG_SOURCE_APPLICATION, GL_DONT_CARE, GL_DONT_CARE, 0, NULL, GL_FALSE);
-		glDebugMessageControl(GL_DEBUG_SOURCE_API, GL_DONT_CARE, GL_DEBUG_SEVERITY_NOTIFICATION, 0, NULL, GL_FALSE);
-	#endif
-		/* Set max work group */
-		glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 0, &mDetails.mMaxComputeWorkGroupSize.x);
-		glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 1, &mDetails.mMaxComputeWorkGroupSize.y);
-		glGetIntegeri_v(GL_MAX_COMPUTE_WORK_GROUP_SIZE, 2, &mDetails.mMaxComputeWorkGroupSize.z);
-		glGetIntegerv(GL_MAX_ARRAY_TEXTURE_LAYERS, &mDetails.mMaxTextureArrayLayers);
-		char buf[512];
-		memcpy(buf, glGetString(GL_VENDOR), 512);
-		mDetails.mVendor = buf;
-		memcpy(buf, glGetString(GL_RENDERER), 512);
-		mDetails.mRenderer = buf;
-		memcpy(buf, glGetString(GL_SHADING_LANGUAGE_VERSION), 512);
-		mDetails.mShadingLanguage = buf;
 	}
 
 	void Renderer::init() {
 		mGPUQuery.destroy();
 		mGPUQuery.init();
 
-		glEnable(GL_LINE_SMOOTH);
-		glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
+		GLDevice::applyDefaultState();
 	}
 
 	void Renderer::render(WindowSurface& window, IDemo* demo, util::Profiler& profiler, const ECS& ecs, ResourceManagers& resourceManagers) {

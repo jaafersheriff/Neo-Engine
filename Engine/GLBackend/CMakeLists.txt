@@ -6,6 +6,7 @@ PUBLIC
 	HAL
 	Util
 PRIVATE
+	Jobs
 	libglew_static
 	TracyClient
 )
