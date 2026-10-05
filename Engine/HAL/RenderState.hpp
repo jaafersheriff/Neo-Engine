@@ -2,6 +2,8 @@
 
 #include <glm/glm.hpp>
 
+#include <optional>
+
 namespace neo {
 
 	/// Depth

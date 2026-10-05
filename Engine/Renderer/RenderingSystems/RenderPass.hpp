@@ -1,7 +1,7 @@
 # pragma once
 
 #include "ResourceManager/ResourceManagers.hpp"
-#include "Renderer/RenderingSystems/RenderState.hpp"
+#include "HAL/RenderState.hpp"
 
 namespace neo {
 	class ECS;
