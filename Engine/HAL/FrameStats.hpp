@@ -1,8 +1,10 @@
 
 #pragma once
 
+#include <cstdint>
+
 namespace neo {
-	// Required to be a POD because thread safety isn't guaranteed (see Renderer::mStats)
+	// Required to be a POD because thread safety isn't guaranteed (see GLDevice::stats)
 	struct FrameStats {
 		uint32_t mNumDraws = 0;
 		uint32_t mNumPrimitives = 0;

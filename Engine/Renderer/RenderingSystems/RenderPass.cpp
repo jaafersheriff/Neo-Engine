@@ -1,6 +1,6 @@
 #include "Renderer/pch.hpp"
 
-#include "Renderer/FrameStats.hpp"
+#include "HAL/FrameStats.hpp"
 #include "GLBackend/RenderStateGL.hpp"
 
 #include "RenderPass.hpp"

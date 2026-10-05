@@ -2,7 +2,7 @@
 
 #include "ResolvedShaderInstance.hpp"
 
-#include "Renderer/Renderer.hpp"
+#include "GLBackend/GLDevice.hpp"
 #include "GLBackend/SourceShader.hpp"
 #include "GLBackend/GLHelper.hpp"
 #include "GLBackend/Texture.hpp"
@@ -17,9 +17,9 @@
 #include "Loader/Loader.hpp"
 
 #include "GLHelper.hpp"
-#include "Util/ServiceLocator.hpp"
 
 #include <GL/glew.h>
+#include "Util/Profiler.hpp"
 
 namespace neo {
 	namespace {
@@ -142,7 +142,7 @@ namespace neo {
 			std::stringstream preambleBuilder;
 			{
 				TRACY_ZONEN("Construct preamble");
-				preambleBuilder << ServiceLocator<Renderer>::ref().getDetails().mGLSLVersion << "\n\n";
+				preambleBuilder << GLDevice::details().mGLSLVersion << "\n\n";
 				const ShaderDefines* _defines = &defines;
 				while (_defines) {
 					for (auto& define : _defines->mDefines) {
@@ -340,7 +340,7 @@ namespace neo {
 	}
 
 	GLint ResolvedShaderInstance::_getUniform(const char* name) const {
-		ServiceLocator<Renderer>::ref().mStats.mNumUniforms++;
+		GLDevice::stats().mNumUniforms++;
 		const auto uniform = mUniforms.find(HashedString(name));
 		if (uniform == mUniforms.end()) {
 			// NEO_LOG_S(util::LogSeverity::Warning, "%s is not an uniform variable", name);
@@ -371,7 +371,7 @@ namespace neo {
 	}
 
 	void ResolvedShaderInstance::bindTexture(const char* name, const Texture& texture) const {
-		ServiceLocator<Renderer>::ref().mStats.mNumSamplers++;
+		GLDevice::stats().mNumSamplers++;
 
 		GLint bindingLoc = 0;
 		auto binding = mBindings.find(HashedString(name));
