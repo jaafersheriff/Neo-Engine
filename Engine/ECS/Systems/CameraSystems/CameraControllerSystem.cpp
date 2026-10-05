@@ -1,5 +1,4 @@
 #include "ECS/pch.hpp"
-#include "Engine/Engine.hpp"
 #include "CameraControllerSystem.hpp"
 
 #include "ECS/Component/EngineComponents/FrameStatsComponent.hpp"

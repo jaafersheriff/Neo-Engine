@@ -3,7 +3,6 @@
 #include "ECS/Component/Component.hpp"
 #include "ECS/Component/SpatialComponent/SpatialComponent.hpp"
 
-#include "Loader/Loader.hpp"
 
 namespace neo {
 

@@ -2,7 +2,6 @@
 
 #include "SourceShader.hpp"
 
-#include "Renderer/Renderer.hpp"
 #include "GLBackend/ResolvedShaderInstance.hpp"
 
 namespace neo {

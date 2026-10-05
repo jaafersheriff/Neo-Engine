@@ -26,6 +26,7 @@
 #include "ResourceManager/ResourceManagers.hpp"
 
 #include "glm/gtc/matrix_transform.hpp"
+#include "Loader/Loader.hpp"
 
 using namespace neo;
 
