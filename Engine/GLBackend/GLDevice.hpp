@@ -1,5 +1,6 @@
 #pragma once
 
+#include "HAL/FrameStats.hpp"
 #include "HAL/RenderDetails.hpp"
 
 namespace neo {
@@ -8,8 +9,15 @@ namespace neo {
 	namespace GLDevice {
 
 		void init(RendererDetails& details);
+
 		void applyDefaultState();
 		void collectGpuProfile();
+
+		// The details populated during init
+		const RendererDetails& details();
+		// Runtime counters
+		FrameStats& stats();
+
 	}
 
 }

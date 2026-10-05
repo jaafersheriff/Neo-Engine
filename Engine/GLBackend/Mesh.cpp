@@ -2,10 +2,9 @@
 #include "Mesh.hpp"
 
 #include "GLBackend/GLHelper.hpp"
-#include "Renderer/Renderer.hpp"
+#include "GLBackend/GLDevice.hpp"
 
 #include "GL/glew.h"
-#include "Util/ServiceLocator.hpp"
 #include "HAL/GpuScope.hpp"
 
 namespace neo {
@@ -44,14 +43,14 @@ namespace neo {
 	void Mesh::draw(uint32_t size, uint32_t elementOffset, uint32_t baseVertex) const {
 		// TRACY_ZONE();
 
-		ServiceLocator<Renderer>::ref().mStats.mNumDraws++;
+		GLDevice::stats().mNumDraws++;
 
 		glBindVertexArray(mVAOID);
 
 		const auto& positions = getVBO(types::mesh::VertexType::Position);
 		if (mElementVBO) {
 			uint32_t usedSize = size ? size : mElementVBO->elementCount;
-			ServiceLocator<Renderer>::ref().mStats.mNumPrimitives += usedSize / positions.components;
+			GLDevice::stats().mNumPrimitives += usedSize / positions.components;
 			glDrawElementsBaseVertex(
 				_translatePrimitive(mPrimitiveType),
 				usedSize,
@@ -61,11 +60,11 @@ namespace neo {
 			);
 		}
 		else if (size) {
-			ServiceLocator<Renderer>::ref().mStats.mNumPrimitives += size / positions.components;
+			GLDevice::stats().mNumPrimitives += size / positions.components;
 			glDrawArrays(_translatePrimitive(mPrimitiveType), 0, size / positions.components);
 		}
 		else {
-			ServiceLocator<Renderer>::ref().mStats.mNumPrimitives += positions.elementCount / positions.components;
+			GLDevice::stats().mNumPrimitives += positions.elementCount / positions.components;
 			glDrawArrays(_translatePrimitive(mPrimitiveType), 0, positions.elementCount / positions.components);
 		}
 	}

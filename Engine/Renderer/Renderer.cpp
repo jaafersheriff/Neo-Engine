@@ -97,7 +97,7 @@ namespace neo {
 		profiler.markFrameGPU(mGPUQuery.getGPUTime());
 		GpuTimer::Scope _scope(mGPUQuery.tickHandle());
 
-		mStats = {};
+		GLDevice::stats() = {};
 
 		RendererParamsComponent params;
 		if (auto rendererParams = ecs.cGetComponent<RendererParamsComponent>()) {
@@ -174,7 +174,7 @@ namespace neo {
 
 		renderPasses._execute(resourceManagers, ecs, params.mWireframe);
 
-		mPreviousStats = mStats;
+		mPreviousStats = GLDevice::stats();
 	}
 
 	void Renderer::_imGuiEditor(WindowSurface& window, ECS& ecs, ResourceManagers& resourceManager) {

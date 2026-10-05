@@ -13,6 +13,11 @@ namespace neo {
 
 	namespace GLDevice {
 
+		namespace {
+			RendererDetails sDetails;
+			FrameStats sStats;
+		}
+
 		void init(RendererDetails& details) {
 			NEO_ASSERT(isRenderThread(), "GLDevice initialized off the render thread - the GL context belongs to it");
 
@@ -39,6 +44,16 @@ namespace neo {
 			details.mVendor = reinterpret_cast<const char*>(glGetString(GL_VENDOR));
 			details.mRenderer = reinterpret_cast<const char*>(glGetString(GL_RENDERER));
 			details.mShadingLanguage = reinterpret_cast<const char*>(glGetString(GL_SHADING_LANGUAGE_VERSION));
+
+			sDetails = details;
+		}
+
+		const RendererDetails& details() {
+			return sDetails;
+		}
+
+		FrameStats& stats() {
+			return sStats;
 		}
 
 		void collectGpuProfile() {

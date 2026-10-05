@@ -3,7 +3,7 @@
 #include "ResourceManager/TextureManager.hpp"
 #include "DemoInfra/IDemo.hpp"
 
-#include "FrameStats.hpp"
+#include "HAL/FrameStats.hpp"
 #include "HAL/GpuTimer.hpp"
 #include "HAL/RenderDetails.hpp"
 
@@ -37,9 +37,6 @@ namespace neo {
 			Renderer(Renderer &&) = delete;
 			Renderer & operator=(Renderer &&) = delete;
 
-			// Written by the render thread, copied to mPreviousStats for reads on the main thread
-			FrameStats mStats = {};
-
 			RendererDetails getDetails() const { return mDetails; }
 
 			void setDemoConfig(IDemo::Config);
@@ -55,10 +52,11 @@ namespace neo {
 		private:
 			void _imGuiEditor(WindowSurface& window, ECS& ecs, ResourceManagers& resourceManager);
 
+			// Copied from GLDevice::stats() at the end of a frame, for reads on the main thread
 			FrameStats mPreviousStats = {};
 			RendererDetails mDetails = {};
 
-			// Assigned on the render thread, read by ImGui on main without synchronisation.
+			// Assigned on the render thread, read by ImGui on main without sync
 			// Should be safe - the worst outcome is that isValid() fails and systems gracefully return early
 			TextureHandle mSceneColorTextureHandle;
 
