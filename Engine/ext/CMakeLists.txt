@@ -12,6 +12,7 @@ PRIVATE
 )
 set_target_properties(glfw PROPERTIES FOLDER "Neo/ext/GLFW3")
 set_target_properties(update_mappings PROPERTIES FOLDER "Neo/ext/GLFW3")
+target_compile_definitions(glfw INTERFACE GLFW_INCLUDE_NONE)
 
 ## GLEW
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/glew-cmake")
