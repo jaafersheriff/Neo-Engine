@@ -35,11 +35,17 @@ namespace neo {
 		OneMinusSrcAlpha,
 		One
 	};
+	struct BlendFuncAlpha {
+		BlendFuncSrc mBlendSrc = BlendFuncSrc::One;
+		BlendFuncDst mBlendDst = BlendFuncDst::OneMinusSrcAlpha;
+	};
 	struct BlendState {
 		BlendEquation mBlendEquation  = BlendEquation::Add;
 		BlendFuncSrc mBlendSrc = BlendFuncSrc::Alpha;
 		BlendFuncDst mBlendDst = BlendFuncDst::OneMinusSrcAlpha;
 		glm::vec4 mBlendColor = glm::vec4(0.f);
+		// Unset means alpha blends with the color factors
+		std::optional<BlendFuncAlpha> mBlendAlpha = std::nullopt;
 	};
 
 
@@ -59,6 +65,8 @@ namespace neo {
 		std::optional<BlendState> mBlendState = std::nullopt;
 		PolygonMode mPolygonMode = PolygonMode::Fill;
 		bool mWireframeable = true;
+		// x, y, w, h from the bottom left
+		std::optional<glm::ivec4> mScissor = std::nullopt;
 	};
 
 	constexpr static RenderState sDisableDepthState = RenderState {

@@ -5,6 +5,32 @@
 #include "Util/Assert.hpp"
 
 namespace neo {
+	namespace {
+		GLenum _getGLBlendSrc(BlendFuncSrc src) {
+			switch (src) {
+			case BlendFuncSrc::One:
+				return GL_ONE;
+			case BlendFuncSrc::Alpha:
+				return GL_SRC_ALPHA;
+			default:
+				NEO_FAIL("Invalid blend state");
+				return GL_ONE;
+			}
+		}
+
+		GLenum _getGLBlendDst(BlendFuncDst dst) {
+			switch (dst) {
+			case BlendFuncDst::One:
+				return GL_ONE;
+			case BlendFuncDst::OneMinusSrcAlpha:
+				return GL_ONE_MINUS_SRC_ALPHA;
+			default:
+				NEO_FAIL("Invalid blend state");
+				return GL_ONE;
+			}
+		}
+	}
+
 	void applyRenderState(const RenderState& renderState, const glm::uvec2& viewport) {
 		glViewport(0, 0, viewport.x, viewport.y);
 
@@ -62,31 +88,17 @@ namespace neo {
 				break;
 			}
 
-			uint32_t blendSrc = 0;
-			uint32_t blendDst = 0;
-			switch (renderState.mBlendState->mBlendSrc) {
-			case BlendFuncSrc::One:
-				blendSrc = GL_ONE;
-				break;
-			case BlendFuncSrc::Alpha:
-				blendSrc = GL_SRC_ALPHA;
-				break;
-			default:
-				NEO_FAIL("Invalid blend state");
-				break;
+			if (renderState.mBlendState->mBlendAlpha) {
+				glBlendFuncSeparate(
+					_getGLBlendSrc(renderState.mBlendState->mBlendSrc),
+					_getGLBlendDst(renderState.mBlendState->mBlendDst),
+					_getGLBlendSrc(renderState.mBlendState->mBlendAlpha->mBlendSrc),
+					_getGLBlendDst(renderState.mBlendState->mBlendAlpha->mBlendDst)
+				);
 			}
-			switch (renderState.mBlendState->mBlendDst) {
-			case BlendFuncDst::One:
-				blendDst = GL_ONE;
-				break;
-			case BlendFuncDst::OneMinusSrcAlpha:
-				blendDst = GL_ONE_MINUS_SRC_ALPHA;
-				break;
-			default:
-				NEO_FAIL("Invalid blend state");
-				break;
+			else {
+				glBlendFunc(_getGLBlendSrc(renderState.mBlendState->mBlendSrc), _getGLBlendDst(renderState.mBlendState->mBlendDst));
 			}
-			glBlendFunc(blendSrc, blendDst);
 
 			glBlendColor(
 				renderState.mBlendState->mBlendColor.r,
@@ -97,6 +109,14 @@ namespace neo {
 		}
 		else {
 			glDisable(GL_BLEND);
+		}
+
+		if (renderState.mScissor) {
+			glEnable(GL_SCISSOR_TEST);
+			glScissor(renderState.mScissor->x, renderState.mScissor->y, renderState.mScissor->z, renderState.mScissor->w);
+		}
+		else {
+			glDisable(GL_SCISSOR_TEST);
 		}
 
 		switch (renderState.mPolygonMode) {
